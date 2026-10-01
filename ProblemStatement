@@ -1,0 +1,57 @@
+LangLeap - Language Learning App for Hindi and Marathi Speakers
+
+Problem Statement:
+An edtech company wants an app that teaches English to Hindi and Marathi speakers through short
+daily lessons, speaking practice and quizzes. Content writers, voice artists and developers must
+work together, and content is the slowest part. The product head wants 120 lessons at launch; the
+content team has written 35 in 2 months. The board has approved ₹35 lakh and 6 months. 
+
+Given Project Data (use these figures - do not invent your own):
+● Content rate: 35 lessons in 8 weeks. Compute the weekly rate and the weeks needed for 120 lessons.
+● Voice recording: 1.5 hours per lesson; one voice artist at 15 hours per week. Compute weeks for 120 lessons.
+● App development: 20 weeks. Identify which stream controls the launch. 
+
+Objectives
+● Requirements Engineering: Elicit requirements from learners, content writers, voice artists,
+product head through interviews and analysis of the existing forms and spreadsheets; write 11
+functional and 6 non-functional requirements covering offline behaviour, usability and content
+quality, attach a measurable target to every NFR, and prioritise with MoSCoW.
+● Software Design & UML: Produce use case, class, sequence (for 'complete a lesson and
+unlock the next') and activity diagrams, plus a state diagram for the lesson progress; explain
+how you kept content pipeline and app loosely coupled and each module cohesive.
+● Testing & Quality Assurance: Design boundary value tests for the quiz score threshold
+field, equivalence classes and a decision table for lesson unlock and streak rules, and compute
+defect density and defect removal efficiency (DRE) from your test log.
+● Scheduling & Milestones: Identify the controlling stream and build a Gantt chart with all
+three streams. Show the forward pass, name the critical path, give the float of every
+non-critical task, and draw the Gantt chart with milestones as zero-duration checkpoints.
+● Estimation: Compute content and voice durations. Show every formula and intermediate
+step, state your assumptions, and explain why the result is an estimate and not a promise.
+● Risk Management: Build a risk register including content quality and artist availability.
+Score each risk as probability x impact, rank by exposure, give each a response and an owner,
+and keep problems that have already occurred in a separate issue log.
+
+
+Outcomes
+● A complete IEEE 830-style SRS in which every NFR (offline behaviour, usability and content
+quality) is measurable - no 'the system shall be fast'.
+● A UML package whose use case, class, sequence and state diagrams are consistent with one
+another, with a written cohesion and coupling justification.
+● Content and voice-recording durations calculated from actual rates.
+● An analysis that identifies which of the three streams controls the launch.
+● Systematically derived test cases, with DRE and defect-density figures, that would catch
+errors in lesson unlock and streak rules.
+
+Deliverables
+● SRS Document - Scope, FRs, measurable NFRs, constraints, MoSCoW priorities and a
+traceability matrix linking every FR to a test case.
+● UML Package - Use case, class, sequence ('complete a lesson and unlock the next'), activity
+and state (lesson progress) diagrams, internally consistent.
+● Project Plan - WBS, network diagram with critical path, Gantt chart with milestones and
+resource allocation.
+● Estimation Sheet - Content and voice calculations; every calculation shown step by step,
+with formulas, assumptions and confidence level.
+● Test Plan & Evidence - Test cases, BVA and decision tables for lesson unlock and streak
+rules, defect log, DRE and defect-density calculation.
+● Risk Register & Closure Note - Probability-impact matrix, exposure-ranked risks with
+RMMM for the top three, and a lessons-learned page.
