@@ -24,8 +24,6 @@ import {
 import { formatDate, formatScore } from '@/data/progression'
 import { ensureLearnerData } from '@/data/bootstrap'
 
-const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
-
 export default function ProgressPage() {
   const user = useAuthStore((s) => s.user)
   if (!user) return null
@@ -36,30 +34,6 @@ export default function ProgressPage() {
   const progress = getProgress(user.id)
   const streak = getStreak(user.id)
   const today = todayKey()
-
-  const isActive = (key: string) =>
-    Object.values(progress).some((r) => r.completedAt.slice(0, 10) === key && r.passed) ||
-    key === streak.lastDay
-
-  // Three calendar weeks (Sun-thru-Sat): previous, current, next.
-  const weekFrames = (offsetWeeks: number) => {
-    const anchor = new Date()
-    anchor.setDate(anchor.getDate() - anchor.getDay())
-    anchor.setDate(anchor.getDate() + offsetWeeks * 7)
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(anchor)
-      d.setDate(d.getDate() + i)
-      return {
-        key: d.toISOString().slice(0, 10),
-        weekday: WEEKDAYS[d.getDay()],
-        inPast: d.getTime() < Date.now(),
-      }
-    })
-  }
-
-  const previousWeek = weekFrames(-1)
-  const thisWeek = weekFrames(0)
-  const nextWeek = weekFrames(1)
 
   return (
     <div className="space-y-6">
@@ -100,48 +74,6 @@ export default function ProgressPage() {
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Streak calendar</CardTitle>
-          <CardDescription>Previous and current week show real activity; next week is your target.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {(
-            [
-              { label: 'Previous week', days: previousWeek },
-              { label: 'This week', days: thisWeek },
-              { label: 'Next week', days: nextWeek },
-            ] as const
-          ).map(({ label, days }) => (
-            <div key={label}>
-              <p className="mb-1.5 text-xs font-medium text-muted-foreground">{label}</p>
-              <div className="flex justify-between gap-2">
-                {days.map((d) => {
-                  const active = isActive(d.key)
-                  const future = !d.inPast
-                  return (
-                    <div key={d.key} className="flex flex-1 flex-col items-center gap-1.5">
-                      <span className="text-xs text-muted-foreground">{d.weekday}</span>
-                      <div
-                        className={`flex size-9 items-center justify-center rounded-lg border ${
-                          future
-                            ? 'border-dashed border-border bg-muted/30 text-muted-foreground/60'
-                            : active
-                              ? 'border-primary bg-primary text-primary-foreground'
-                              : 'border-border bg-muted/40 text-muted-foreground'
-                        }`}
-                      >
-                        {future ? '·' : active ? <Check className="size-4" /> : '·'}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader>
