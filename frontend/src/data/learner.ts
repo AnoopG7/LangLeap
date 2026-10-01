@@ -36,12 +36,23 @@ export function dateOffsetKey(days: number, from: Date = new Date()): string {
   return key(d)
 }
 
+/** Calendar-week key (Sunday-start) for a date — used for the 1-freeze/week rule. */
+export function weekKey(now: Date = new Date()): string {
+  const d = new Date(now)
+  d.setDate(d.getDate() - d.getDay())
+  return key(d)
+}
+
 // ── Progress ────────────────────────────────────────────────────────────────
 
 const PROGRESS_KEY = 'langleap_progress'
 
 export function getProgress(userId: string): Record<string, ProgressRecord> {
   return read<Record<string, ProgressRecord>>(`${PROGRESS_KEY}:${userId}`, {})
+}
+
+export function hasProgress(userId: string): boolean {
+  return Object.keys(getProgress(userId)).length > 0
 }
 
 export function setProgress(userId: string, lessonId: string, record: ProgressRecord) {
@@ -85,10 +96,7 @@ export function freezeAvailableThisWeek(s: Streak): boolean {
 }
 
 function currentWeek(): string {
-  const d = new Date()
-  const start = new Date(d)
-  start.setDate(d.getDate() - d.getDay())
-  return key(start)
+  return weekKey()
 }
 
 const STREAK_KEY = 'langleap_streak'
@@ -101,6 +109,11 @@ export function getStreak(userId: string): Streak {
     freezesUsed: 0,
     freezeWeek: '',
   })
+}
+
+/** Directly writes a streak snapshot — used by the learner bootstrap seeder. */
+export function setStreak(userId: string, streak: Streak) {
+  write(`${STREAK_KEY}:${userId}`, streak)
 }
 
 /** Applies the streak rule for today after a lesson pass (FR-08). */

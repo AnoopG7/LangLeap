@@ -29,10 +29,11 @@ import {
 } from '@/components/ui'
 import { useAuthStore } from '@/stores'
 import { getLessons } from '@/data/lessons'
-import { getProgress, getStreak } from '@/data/learner'
+import { getProgress, getStreak, freezeAvailableThisWeek } from '@/data/learner'
 import { lessonLaunchState } from '@/data/progression'
 import { formatDate, formatScore } from '@/data/progression'
 import { ROLE_LABELS, canAccessPath } from '@/data/users'
+import { ensureLearnerData } from '@/data/bootstrap'
 import { PASS_THRESHOLD } from '@/lib'
 
 export default function DashboardPage() {
@@ -43,13 +44,19 @@ export default function DashboardPage() {
 
   // ── Learner dashboard ──────────────────────────────────────────────────────
   if (user.role === 'learner') {
+    ensureLearnerData(user.id)
     const lessons = getLessons()
     const progress = getProgress(user.id)
     const streak = getStreak(user.id)
 
     const passed = Object.values(progress).filter((p) => p.passed).length
     const published = lessons.filter((l) => l.state === 'published')
-    const current = published.find((l) => lessonLaunchState(l, progress, false) === 'available')
+    const current =
+    published.find((l, i) =>
+      lessonLaunchState(l, progress, i === 0 ? true : Boolean(progress[published[i - 1].id]?.passed)) === 'available') ??
+    // Once every published lesson is passed the path has no "available" step —
+    // surface the most recent one so the demo still has an obvious next action.
+    [...published].reverse().find((l) => progress[l.id]?.passed)
 
     const lastResults = Object.entries(progress)
       .map(([lessonId, rec]) => ({ ...rec, lessonId }))
@@ -68,7 +75,7 @@ export default function DashboardPage() {
           {current && (
             <Button className="gap-2" onClick={() => navigate(`/lesson/${current.id}`)}>
               <BookOpen className="size-4" />
-              Continue lesson {current.code}
+              {progress[current.id]?.passed ? `Review lesson ${current.code}` : `Continue lesson ${current.code}`}
             </Button>
           )}
         </div>
@@ -82,7 +89,7 @@ export default function DashboardPage() {
               <CardTitle className="text-3xl">{streak.current} day{streak.current === 1 ? '' : 's'}</CardTitle>
             </CardHeader>
             <CardContent className="text-xs text-muted-foreground">
-              Best: {streak.best} · Freeze used this week: {streak.freezesUsed}/1
+              Best: {streak.best} · Freeze: {freezeAvailableThisWeek(streak) ? 'available' : 'used this week'}
             </CardContent>
           </Card>
           <Card>

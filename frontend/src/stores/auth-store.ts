@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import type { SignInInput, SignUpInput } from '@/lib/schemas'
 import type { LangLeapRole, User } from '@/lib/types'
 import { DEMO_USERS, type DemoUser } from '@/data/users'
-import { addNotification } from '@/data/learner'
+import { ensureLearnerData } from '@/data/bootstrap'
 
 interface AuthState {
   user: User | null
@@ -79,7 +79,9 @@ export const useAuthStore = create<AuthState>((set) => ({
     const user = toUser(match)
     localStorage.setItem(TOKEN_KEY, `langleap-demo-${user.id}`)
     localStorage.setItem(USER_KEY, JSON.stringify(user))
-    addNotification(user.id, 'Welcome to LangLeap', 'Your daily lesson is waiting — stay consistent to build your streak!')
+    // Seed a learner's first-run history (progress/streak/notifications) so
+    // the demo opens alive instead of an empty ledger.
+    if (user.role === 'learner') ensureLearnerData(user.id)
     set({ user, token: localStorage.getItem(TOKEN_KEY), isAuthenticated: true, isLoading: false, error: null })
   },
 

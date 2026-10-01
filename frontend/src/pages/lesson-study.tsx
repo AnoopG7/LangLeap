@@ -41,6 +41,7 @@ import {
 import { lessonLaunchState } from '@/data/progression'
 import { localizedText, PASS_THRESHOLD } from '@/lib'
 import type { FirstLanguage } from '@/lib'
+import { ensureLearnerData } from '@/data/bootstrap'
 
 type Step = 'content' | 'speaking' | 'quiz' | 'result'
 
@@ -67,6 +68,8 @@ export default function LessonStudyPage() {
   const [gloss, setGloss] = useState<FirstLanguage>(user?.firstLanguage ?? 'hindi')
 
   if (!user) return null
+
+  ensureLearnerData(user.id)
 
   if (!lesson) {
     return (
@@ -267,7 +270,7 @@ export default function LessonStudyPage() {
                           size="sm"
                           variant={done ? 'outline' : 'default'}
                           className="gap-1.5"
-                          disabled={recordingLine !== null || done}
+                          disabled={recordingLine !== null}
                           onClick={() => recordLine(i)}
                         >
                           {recordingLine === i ? <Mic className="size-3.5 animate-pulse" /> : <Mic className="size-3.5" />}
@@ -278,13 +281,18 @@ export default function LessonStudyPage() {
                   )
                 })}
               </div>
-              <Button
-                className="gap-2"
-                disabled={speakingScore === null}
-                onClick={() => setStep('quiz')}
-              >
-                Continue to quiz <ArrowRight className="size-4" />
-              </Button>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <Button
+                  className="gap-2"
+                  disabled={speakingScore === null}
+                  onClick={() => setStep('quiz')}
+                >
+                  Continue to quiz <ArrowRight className="size-4" />
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setStep('quiz')} disabled={recordingLine !== null}>
+                  Skip speaking practice — take the quiz →
+                </Button>
+              </div>
             </div>
           )}
 

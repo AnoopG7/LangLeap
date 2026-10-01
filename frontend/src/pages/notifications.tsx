@@ -9,12 +9,15 @@ import {
 } from '@/data/learner'
 import type { LangLeapNotification } from '@/lib'
 import { formatDate } from '@/data/progression'
+import { ensureLearnerData } from '@/data/bootstrap'
 
 export default function NotificationsPage() {
   const user = useAuthStore((s) => s.user)
-  const [notes, setNotes] = useState<LangLeapNotification[]>(() =>
-    user ? getNotifications(user.id) : [],
-  )
+  const [notes, setNotes] = useState<LangLeapNotification[]>(() => {
+    if (!user) return []
+    ensureLearnerData(user.id)
+    return getNotifications(user.id)
+  })
 
   if (!user) return null
 

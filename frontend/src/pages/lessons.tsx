@@ -14,10 +14,13 @@ import { getLessons } from '@/data/lessons'
 import { getProgress } from '@/data/learner'
 import { formatScore, lessonLaunchState } from '@/data/progression'
 import { localizedText } from '@/lib'
+import { ensureLearnerData } from '@/data/bootstrap'
 
 export default function LessonsPage() {
   const user = useAuthStore((s) => s.user)
   if (!user) return null
+
+  ensureLearnerData(user.id)
 
   const lessons = getLessons()
   const progress = getProgress(user.id)

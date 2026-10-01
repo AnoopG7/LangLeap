@@ -1,6 +1,6 @@
 import type { BilingualText, Lesson, QuizItem, ScriptLine } from '@/lib'
 
-const LESSONS_KEY = 'langleap_lessons_v2'
+const LESSONS_KEY = 'langleap_lessons_v3'
 
 export function scriptEnglish(script: ScriptLine[]): string[] {
   return script.map((l) => l.en)
@@ -26,8 +26,11 @@ function hint(en: string, hi: string, mr: string): BilingualText {
 
 type SeedRow = Omit<Lesson, 'scriptTargetSec' | 'audioDurationSec'>
 
-// L1..L8 published with valid audio, L9 in_review with out-of-tolerance audio
-// (+31%, see LL-Test-Plan DF-06) so the review gate rejects it, L10 draft (no audio).
+// Demo seed keeps every pipeline stage alive:
+//   L1..L8 published with in-tolerance audio → learner quizzes takeable on all.
+//   L9 in_review with out-of-tolerance audio (+31%, LL-Test-Plan DF-06) → review gate rejects it.
+//   L10 draft without audio → voice "needs a take", writer can edit/submit.
+//   L11 in_review fully passing the gate → reviewer can approve & publish live.
 function seed(): Lesson[] {
   const lessons: SeedRow[] = [
     {
@@ -170,6 +173,34 @@ function seed(): Lesson[] {
         q('You should see a:', ['Doctor (डॉक्टर)', 'Driver', 'Tailor'], 0),
       ],
     },
+    {
+      id: 'l-11', code: 'LL-11', title: 'At the Airport', level: 'A2', position: 11, state: 'in_review', version: 1,
+      script: [
+        line('Where is the boarding gate?', 'बोर्डिंग गेट कहाँ है?', 'बोर्डिंग गेट कुठे आहे?'),
+        line('My flight departs at eight.', 'मेरी फ्लाइट आठ बजे है।', 'माझे विमान आठ वाजता सुटते.'),
+        line('Please show your passport.', 'कृपया अपना पासपोर्ट दिखाइए।', 'कृपया तुमचा पासपोर्ट दाखवा.'),
+      ],
+      hint: hint('Airport words for a smooth trip.', 'यात्रा के लिए एयरपोर्ट के शब्द।', 'प्रवासासाठी विमानतळ शब्द.'),
+      audioUrl: 'mock-audio/ll-11', quiz: [
+        q('You show ___ at the airport.', ['Passport (पासपोर्ट)', 'Ticket price', 'Menu'], 0),
+        q('The "boarding gate" is where you:', ['Board the plane', 'Buy food', 'Collect luggage'], 0),
+        q('A flight "departs" when it:', ['Leaves', 'Lands', 'Parks'], 0),
+      ],
+    },
+    {
+      id: 'l-12', code: 'LL-12', title: 'Bank & Money', level: 'A2', position: 12, state: 'draft', version: 1,
+      script: [
+        line('I want to open an account.', 'मुझे खाता खोलना है।', 'मला खाते उघडायचे आहे.'),
+        line('What is the interest rate?', 'ब्याज दर क्या है?', 'व्याजदर किती आहे?'),
+        line('Enter your PIN here.', 'यहाँ अपना पिन डालें।', 'इथे तुमचा पिन टाका.'),
+      ],
+      hint: hint('Simple words to use at the bank.', 'बैंक में काम आने वाले शब्द।', 'बँकेत उपयोगी शब्द.'),
+      audioUrl: null, quiz: [
+        q('A bank keeps your ___ safe.', ['Money (पैसा)', 'Books', 'Shoes'], 0),
+        q('You keep your money in an ___.', ['Account (खाता)', 'Umbrella', 'Address'], 0),
+        q('Your secret number is a ___.', ['PIN', 'Pen', 'Pan'], 0),
+      ],
+    },
   ]
 
   return lessons.map((lesson) => {
@@ -206,7 +237,11 @@ export function getLessons(): Lesson[] {
     const raw = localStorage.getItem(LESSONS_KEY)
     if (raw) {
       const parsed = (JSON.parse(raw) as Lesson[]).map(normalize)
-      return parsed
+      // Reject stale/corrupt shapes (e.g. legacy rows without a state) rather
+      // than returning lessons that would lock the entire learner path.
+      if (parsed.length > 0 && parsed.every((l) => l.state)) {
+        return parsed
+      }
     }
   } catch {
     /* ignore */
