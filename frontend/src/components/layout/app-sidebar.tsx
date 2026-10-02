@@ -64,7 +64,7 @@ const navGroups: NavGroup[] = [
         to: '/studio/voice',
         label: 'Voice Recording',
         icon: Mic,
-        roles: ['voice_artist', 'admin'],
+        roles: ['voice_artist', 'reviewer', 'admin', 'product_head'],
       },
       {
         to: '/studio/review',

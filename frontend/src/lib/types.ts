@@ -17,6 +17,8 @@ export type FirstLanguage = 'hindi' | 'marathi'
 export type EnglishLevel = 'A1' | 'A2'
 
 export type LessonState = 'draft' | 'in_review' | 'published' | 'deprecated'
+export type ReviewDecision = 'accepted' | 'rejected'
+export type AudioStatus = 'draft' | 'submitted' | 'accepted' | 'rejected'
 
 /** A short string rendered in the learner's first language (FR-01 localisation). */
 export interface BilingualText {
@@ -54,6 +56,10 @@ export interface Lesson {
   audioUrl: string | null
   audioDurationSec: number | null
   scriptTargetSec: number
+  reviewDecision?: ReviewDecision
+  reviewNote?: string
+  audioStatus?: AudioStatus
+  audioNote?: string
 }
 
 export interface User {

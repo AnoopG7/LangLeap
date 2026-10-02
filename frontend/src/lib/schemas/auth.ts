@@ -17,6 +17,7 @@ export const signUpSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters').max(72),
   fullName: z.string().trim().min(1, 'Full name is required').max(200),
   firstLanguage: z.enum(['hindi', 'marathi']),
+  level: z.enum(['A1', 'A2']),
 })
 export type SignUpInput = z.infer<typeof signUpSchema>
 

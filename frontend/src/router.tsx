@@ -73,7 +73,7 @@ export const router = createBrowserRouter([
       {
         path: '/studio/voice',
         element: (
-          <RequireRoles roles={['voice_artist', 'admin']}>
+          <RequireRoles roles={['voice_artist', 'reviewer', 'admin', 'product_head']}>
             <StudioVoicePage />
           </RequireRoles>
         ),

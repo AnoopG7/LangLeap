@@ -1,6 +1,6 @@
-import type { BilingualText, Lesson, QuizItem, ScriptLine } from '@/lib'
+import type { BilingualText, Lesson, LessonState, QuizItem, ScriptLine } from '@/lib'
 
-const LESSONS_KEY = 'langleap_lessons_v3'
+const LESSONS_KEY = 'langleap_lessons_v6'
 
 export function scriptEnglish(script: ScriptLine[]): string[] {
   return script.map((l) => l.en)
@@ -26,11 +26,65 @@ function hint(en: string, hi: string, mr: string): BilingualText {
 
 type SeedRow = Omit<Lesson, 'scriptTargetSec' | 'audioDurationSec'>
 
+function additionalSeedLesson(
+  id: string,
+  code: string,
+  title: string,
+  level: 'A1' | 'A2',
+  position: number,
+  state: LessonState,
+  audio: boolean,
+): SeedRow {
+  const subject = title.toLowerCase()
+  const script = [
+    line(`Let's practise ${subject}.`, `आइए ${subject} का अभ्यास करें।`, `चला ${subject} चा सराव करूया.`),
+    line(`I use English for ${subject}.`, `मैं ${subject} के लिए अंग्रेज़ी का उपयोग करता हूँ।`, `मी ${subject} साठी इंग्रजी वापरतो.`),
+    line(`Please help me with ${subject}.`, `कृपया ${subject} में मेरी मदद करें।`, `कृपया ${subject} मध्ये मला मदत करा.`),
+  ]
+  return {
+    id,
+    code,
+    title,
+    level,
+    position,
+    state,
+    version: 1,
+    script,
+    hint: hint(`Useful English for ${subject}.`, `${subject} के लिए उपयोगी अंग्रेज़ी।`, `${subject} साठी उपयुक्त इंग्रजी.`),
+    audioUrl: audio ? `mock-audio/${id}` : null,
+    quiz: [
+      q(`What are we practising?`, [title, 'A different topic', 'Nothing'], 0),
+      q(`Which phrase asks for help?`, [`Please help me with ${subject}.`, 'Good night.', 'See you later.'], 0),
+      q(`This lesson is about:`, [title, 'Numbers only', 'Grammar only'], 0),
+    ],
+  }
+}
+
+function additionalSeedLessons(): SeedRow[] {
+  const rows = [
+    additionalSeedLesson('l-14', 'LL-14', 'Public Transport', 'A2', 14, 'in_review', true),
+    additionalSeedLesson('l-15', 'LL-15', 'Job Interviews', 'A2', 15, 'in_review', true),
+    additionalSeedLesson('l-16', 'LL-16', 'Doctor Visits', 'A2', 16, 'in_review', false),
+    additionalSeedLesson('l-17', 'LL-17', 'Mobile Phones', 'A1', 17, 'in_review', true),
+    additionalSeedLesson('l-18', 'LL-18', 'Renting a Home', 'A2', 18, 'draft', false),
+    additionalSeedLesson('l-19', 'LL-19', 'Making Plans', 'A1', 19, 'draft', true),
+    additionalSeedLesson('l-20', 'LL-20', 'Travel Check-in', 'A2', 20, 'published', true),
+    additionalSeedLesson('l-21', 'LL-21', 'Workplace Safety', 'A2', 21, 'published', true),
+  ]
+  return rows.map((lesson) =>
+    lesson.id === 'l-18'
+      ? { ...lesson, reviewDecision: 'rejected' as const, reviewNote: 'Add the missing audio take before resubmitting.' }
+      : lesson,
+  )
+}
+
 // Demo seed keeps every pipeline stage alive:
 //   L1..L8 published with in-tolerance audio → learner quizzes takeable on all.
 //   L9 in_review with out-of-tolerance audio (+31%, LL-Test-Plan DF-06) → review gate rejects it.
-//   L10 draft without audio → voice "needs a take", writer can edit/submit.
+//   L10 draft without audio → to do / voice "needs a take".
 //   L11 in_review fully passing the gate → reviewer can approve & publish live.
+//   L12 draft with audio → in progress (authoring complete, review pending).
+//   L13 deprecated → archived history.
 function seed(): Lesson[] {
   const lessons: SeedRow[] = [
     {
@@ -195,12 +249,27 @@ function seed(): Lesson[] {
         line('Enter your PIN here.', 'यहाँ अपना पिन डालें।', 'इथे तुमचा पिन टाका.'),
       ],
       hint: hint('Simple words to use at the bank.', 'बैंक में काम आने वाले शब्द।', 'बँकेत उपयोगी शब्द.'),
-      audioUrl: null, quiz: [
+      audioUrl: 'mock-audio/l-12', quiz: [
         q('A bank keeps your ___ safe.', ['Money (पैसा)', 'Books', 'Shoes'], 0),
         q('You keep your money in an ___.', ['Account (खाता)', 'Umbrella', 'Address'], 0),
         q('Your secret number is a ___.', ['PIN', 'Pen', 'Pan'], 0),
       ],
     },
+    {
+      id: 'l-13', code: 'LL-13', title: 'Introductions (旧 version)', level: 'A1', position: 13, state: 'deprecated', version: 3,
+      script: [
+        line('I am learning English.', 'मैं अंग्रेज़ी सीख रहा हूँ।', 'मी इंग्रजी शिकत आहे.'),
+        line('I live in Pune.', 'मैं पुणे में रहता हूँ।', 'मी पुण्यात राहतो.'),
+        line('Please speak slowly.', 'कृपया धीरे बोलिए।', 'कृपया हळू बोला.'),
+      ],
+      hint: hint('A retired lesson version kept for audit history.', 'पुराना पाठ केवल इतिहास के लिए रखा गया है।', 'जुनी आवृत्ती फक्त इतिहासासाठी जतन केली आहे.'),
+      audioUrl: 'mock-audio/l-13-v2', quiz: [
+        q('What are you learning?', ['English', 'Music', 'Maths'], 0),
+        q('Where do you live?', ['Pune', 'Delhi', 'Goa'], 0),
+        q('How should someone speak?', ['Slowly', 'Loudly', 'Never'], 0),
+      ],
+    },
+    ...additionalSeedLessons(),
   ]
 
   return lessons.map((lesson) => {
@@ -282,6 +351,7 @@ export function gateLesson(lesson: Lesson): GateResult {
   const checks: GateResult['checks'] = []
   const wordCount = scriptEnglish(lesson.script).join(' ').split(/\s+/).filter(Boolean).length
   const hasAudio = Boolean(lesson.audioUrl && lesson.audioDurationSec != null)
+  const audioAccepted = lesson.audioStatus === 'accepted' || (lesson.state === 'published' && hasAudio)
 
   checks.push({
     label: 'Script present',
@@ -308,6 +378,11 @@ export function gateLesson(lesson: Lesson): GateResult {
     label: 'Audio recorded',
     pass: hasAudio,
     detail: hasAudio ? 'Audio present' : 'No audio recorded yet',
+  })
+  checks.push({
+    label: 'Audio accepted by voice QA',
+    pass: audioAccepted,
+    detail: audioAccepted ? 'Audio take accepted' : 'Audio must be submitted and accepted before publishing',
   })
   if (hasAudio) {
     const ratio = (lesson.audioDurationSec as number) / lesson.scriptTargetSec

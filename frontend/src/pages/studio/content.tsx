@@ -154,7 +154,21 @@ export default function StudioContentPage() {
       if (form.id) {
         next = all.map((l) =>
           l.id === form.id
-            ? { ...l, title: form.title.trim(), level: form.level, hint, script, quiz, version: l.version + 1 }
+            ? {
+                ...l,
+                title: form.title.trim(),
+                level: form.level,
+                hint,
+                script,
+                quiz,
+                audioUrl: null,
+                audioDurationSec: null,
+                audioStatus: 'draft',
+                audioNote: 'Audio invalidated after the lesson content was edited.',
+                reviewDecision: undefined,
+                reviewNote: undefined,
+                version: l.version + 1,
+              }
             : l,
         )
       } else {

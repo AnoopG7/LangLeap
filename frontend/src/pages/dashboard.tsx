@@ -201,8 +201,11 @@ export default function DashboardPage() {
   // ── Studio dashboard (writer / artist / reviewer / admin / product head) ──
   const lessons = getLessons()
   const published = lessons.filter((l) => l.state === 'published').length
-  const drafts = lessons.filter((l) => l.state === 'draft').length
   const inReview = lessons.filter((l) => l.state === 'in_review').length
+  const done = published
+  const toDo = lessons.filter((l) => l.state === 'draft' && !l.audioUrl).length
+  const inProgress = lessons.filter((l) => l.state === 'draft' && Boolean(l.audioUrl)).length
+  const archived = lessons.filter((l) => l.state === 'deprecated').length
   const needVoice = lessons.filter(
     (l) => (l.state === 'draft' || l.state === 'in_review') && !l.audioUrl,
   ).length
@@ -216,20 +219,20 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription className="flex items-center gap-1.5 text-xs"><Sparkles className="size-3.5 text-primary" /> Published</CardDescription>
-            <CardTitle className="text-3xl">{published}</CardTitle>
+            <CardDescription className="flex items-center gap-1.5 text-xs"><Sparkles className="size-3.5 text-primary" /> Done</CardDescription>
+            <CardTitle className="text-3xl">{done}</CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">live for learners</CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription className="flex items-center gap-1.5 text-xs"><FileEdit className="size-3.5 text-primary" /> Drafts</CardDescription>
-            <CardTitle className="text-3xl">{drafts}</CardTitle>
+            <CardDescription className="flex items-center gap-1.5 text-xs"><FileEdit className="size-3.5 text-primary" /> In progress</CardDescription>
+            <CardTitle className="text-3xl">{inProgress}</CardTitle>
           </CardHeader>
-          <CardContent className="text-xs text-muted-foreground">awaiting authoring</CardContent>
+          <CardContent className="text-xs text-muted-foreground">drafts with voice attached</CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
@@ -240,10 +243,24 @@ export default function DashboardPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
+            <CardDescription className="flex items-center gap-1.5 text-xs"><FileEdit className="size-3.5 text-primary" /> To do</CardDescription>
+            <CardTitle className="text-3xl">{toDo}</CardTitle>
+          </CardHeader>
+          <CardContent className="text-xs text-muted-foreground">drafts without voice</CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-1.5 text-xs"><Mic className="size-3.5 text-primary" /> Need voice</CardDescription>
             <CardTitle className="text-3xl">{needVoice}</CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">awaiting recording</CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription className="flex items-center gap-1.5 text-xs"><Sparkles className="size-3.5 text-primary" /> Archived</CardDescription>
+            <CardTitle className="text-3xl">{archived}</CardTitle>
+          </CardHeader>
+          <CardContent className="text-xs text-muted-foreground">deprecated history</CardContent>
         </Card>
       </div>
 

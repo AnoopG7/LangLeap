@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
-import { Check, Loader2, Mic, RefreshCw } from 'lucide-react'
+import { Check, CheckCircle2, CircleX, Loader2, Mic, RefreshCw, Send } from 'lucide-react'
 import {
   Badge,
   Button,
@@ -36,6 +36,10 @@ export default function StudioVoicePage() {
     (l) => (l.state === 'draft' || l.state === 'in_review') && !l.audioUrl,
   )
   const done = lessons.filter((l) => l.audioUrl)
+  const recordedDrafts = done.filter((lesson) => getAudioStatus(lesson) === 'draft')
+  const submittedTakes = done.filter((lesson) => getAudioStatus(lesson) === 'submitted')
+  const acceptedTakes = done.filter((lesson) => getAudioStatus(lesson) === 'accepted')
+  const rejectedTakes = done.filter((lesson) => getAudioStatus(lesson) === 'rejected')
 
   function record(lesson: Lesson) {
     if (recordingId) return
@@ -47,6 +51,8 @@ export default function StudioVoicePage() {
       const next = updateLesson(lesson.id, {
         audioUrl: `mock-audio/${lesson.id}`,
         audioDurationSec: duration,
+        audioStatus: 'draft',
+        audioNote: '',
       })
       setLessons(next)
       setRecordingId(null)
@@ -59,10 +65,39 @@ export default function StudioVoicePage() {
   }
 
   function rerecord(lesson: Lesson) {
-    const next = updateLesson(lesson.id, { audioUrl: null, audioDurationSec: null })
+    const next = updateLesson(lesson.id, {
+      audioUrl: null,
+      audioDurationSec: null,
+      audioStatus: 'draft',
+      audioNote: '',
+    })
     setLessons(next)
     toast.info('Take cleared — record again')
   }
+
+  function submitAudio(lesson: Lesson) {
+    setLessons(updateLesson(lesson.id, { audioStatus: 'submitted', audioNote: '' }))
+    toast.success(`${lesson.title} submitted for audio QA`)
+  }
+
+  function acceptAudio(lesson: Lesson) {
+    if (!isAudioAccepted(lesson)) {
+      toast.error('This take is outside the ±10% duration tolerance')
+      return
+    }
+    setLessons(updateLesson(lesson.id, { audioStatus: 'accepted', audioNote: '' }))
+    toast.success(`${lesson.title} audio accepted`)
+  }
+
+  function rejectAudio(lesson: Lesson) {
+    setLessons(updateLesson(lesson.id, {
+      audioStatus: 'rejected',
+      audioNote: 'Rejected by audio QA. Record a replacement take within the ±10% duration tolerance.',
+    }))
+    toast.info(`${lesson.title} audio rejected — re-record required`)
+  }
+
+  const canReviewAudio = user.role === 'reviewer' || user.role === 'admin' || user.role === 'product_head'
 
   return (
     <div className="space-y-6">
@@ -120,12 +155,130 @@ export default function StudioVoicePage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Recorded takes</CardTitle>
-          <CardDescription>Audio already attached to lessons. Recording a take again replaces it.</CardDescription>
-        </CardHeader>
-        <CardContent>
+      <AudioSubmissionTable
+        title="Recorded drafts"
+        description="New takes must be submitted before QA can accept or reject them."
+        lessons={recordedDrafts}
+        actionLabel="Submit for QA"
+        actionIcon={<Send className="size-3.5" />}
+        onAction={submitAudio}
+      />
+      <AudioSubmissionTable
+        title="Submitted for audio QA"
+        description="A reviewer, admin, or product head decides whether the take is accepted."
+        lessons={submittedTakes}
+        actionLabel="Accept"
+        actionIcon={<CheckCircle2 className="size-3.5" />}
+        onAction={acceptAudio}
+        secondaryActionLabel="Reject"
+        secondaryActionIcon={<CircleX className="size-3.5" />}
+        onSecondaryAction={rejectAudio}
+        actionsEnabled={canReviewAudio}
+      />
+      <AudioHistory title="Accepted takes" lessons={acceptedTakes} onRerecord={rerecord} />
+      <AudioHistory title="Rejected takes" lessons={rejectedTakes} onRerecord={rerecord} />
+    </div>
+  )
+}
+
+function isAudioAccepted(lesson: Lesson): boolean {
+  const ratio = (lesson.audioDurationSec ?? 0) / lesson.scriptTargetSec
+  return ratio >= 0.9 && ratio <= 1.1
+}
+
+function getAudioStatus(lesson: Lesson): 'draft' | 'submitted' | 'accepted' | 'rejected' {
+  if (lesson.audioStatus) return lesson.audioStatus
+  if (lesson.state === 'published') return 'accepted'
+  if (lesson.state === 'draft') return 'draft'
+  return isAudioAccepted(lesson) ? 'submitted' : 'rejected'
+}
+
+function AudioSubmissionTable({
+  title,
+  description,
+  lessons,
+  actionLabel,
+  actionIcon,
+  onAction,
+  secondaryActionLabel,
+  secondaryActionIcon,
+  onSecondaryAction,
+  actionsEnabled = true,
+}: {
+  title: string
+  description: string
+  lessons: Lesson[]
+  actionLabel: string
+  actionIcon: ReactNode
+  onAction: (lesson: Lesson) => void
+  secondaryActionLabel?: string
+  secondaryActionIcon?: ReactNode
+  onSecondaryAction?: (lesson: Lesson) => void
+  actionsEnabled?: boolean
+}) {
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">{title} <Badge variant="secondary">{lessons.length}</Badge></CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {lessons.length === 0 ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">No takes in this list.</p>
+        ) : (
+          <Table>
+            <TableHeader><TableRow><TableHead>Lesson</TableHead><TableHead>Title</TableHead><TableHead>Duration</TableHead><TableHead className="text-right">Action</TableHead></TableRow></TableHeader>
+            <TableBody>
+              {lessons.map((lesson) => (
+                <TableRow key={lesson.id}>
+                  <TableCell className="font-mono text-xs">{lesson.code}</TableCell>
+                  <TableCell className="font-medium">{lesson.title}</TableCell>
+                  <TableCell>{lesson.audioDurationSec}s</TableCell>
+                  <TableCell className="text-right">
+                    {actionsEnabled && (
+                      <div className="flex justify-end gap-1.5">
+                        <Button size="sm" className="gap-1.5" onClick={() => onAction(lesson)}>{actionIcon}{actionLabel}</Button>
+                        {secondaryActionLabel && onSecondaryAction && (
+                          <Button size="sm" variant="outline" className="gap-1.5 text-destructive" onClick={() => onSecondaryAction(lesson)}>
+                            {secondaryActionIcon}{secondaryActionLabel}
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+function AudioHistory({
+  title,
+  lessons,
+  onRerecord,
+}: {
+  title: string
+  lessons: Lesson[]
+  onRerecord: (lesson: Lesson) => void
+}) {
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">{title} <Badge variant="secondary">{lessons.length}</Badge></CardTitle>
+        <CardDescription>
+          {title === 'Accepted takes'
+            ? 'Within the ±10% duration tolerance and ready for the publish gate.'
+            : 'Outside the ±10% duration tolerance and needs a re-record.'}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {lessons.length === 0 ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">No takes in this list.</p>
+        ) : (
           <Table>
             <TableHeader>
               <TableRow>
@@ -137,9 +290,9 @@ export default function StudioVoicePage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {done.map((lesson) => {
+              {lessons.map((lesson) => {
                 const ratio = (lesson.audioDurationSec ?? 0) / lesson.scriptTargetSec
-                const within = ratio >= 0.9 && ratio <= 1.1
+                const within = isAudioAccepted(lesson)
                 return (
                   <TableRow key={lesson.id}>
                     <TableCell className="font-mono text-xs">{lesson.code}</TableCell>
@@ -147,12 +300,12 @@ export default function StudioVoicePage() {
                     <TableCell>{lesson.audioDurationSec}s</TableCell>
                     <TableCell>
                       <Badge variant={within ? 'default' : 'destructive'}>
-                        {within ? <Check className="size-3" /> : '⨯'} {ratio.toFixed(2)}×
+                        {within ? <Check className="size-3" /> : 'Rejected'} {ratio.toFixed(2)}×
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       {(lesson.state === 'draft' || lesson.state === 'in_review') && (
-                        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => rerecord(lesson)}>
+                        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => onRerecord(lesson)}>
                           <RefreshCw className="size-3.5" /> Re-record
                         </Button>
                       )}
@@ -162,8 +315,8 @@ export default function StudioVoicePage() {
               })}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
-    </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }

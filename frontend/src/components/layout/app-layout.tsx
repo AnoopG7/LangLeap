@@ -1,5 +1,5 @@
 import { Link, Navigate, Outlet, useLocation } from 'react-router-dom'
-import { LogOut, Mic2 } from 'lucide-react'
+import { CloudOff, LogOut, Mic2 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import {
   Avatar,
@@ -20,10 +20,13 @@ import { AppSidebar } from '@/components/layout'
 import { ModeToggle } from '@/components/theme'
 import { useAuthStore } from '@/stores'
 import { NotificationsPopover } from '@/components/alerts'
+import { useOfflineSync } from '@/hooks/use-offline-sync'
 
 export function AppLayout({ children }: { children?: ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const location = useLocation()
+  const userId = useAuthStore((s) => s.user?.id)
+  const { online, pending } = useOfflineSync(userId)
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />
@@ -37,6 +40,12 @@ export function AppLayout({ children }: { children?: ReactNode }) {
           <Separator orientation="vertical" className="mr-2 h-4" />
           <div className="flex flex-1 items-center gap-2 text-sm text-muted-foreground">
             <span>LangLeap</span>
+            {isAuthenticated && (!online || pending > 0) && (
+              <span className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs">
+                <CloudOff className="size-3" />
+                {online ? `${pending} pending sync` : 'Offline'}
+              </span>
+            )}
           </div>
           <UserMenu />
         </header>

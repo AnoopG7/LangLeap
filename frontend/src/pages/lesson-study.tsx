@@ -42,6 +42,7 @@ import { lessonLaunchState } from '@/data/progression'
 import { localizedText, PASS_THRESHOLD } from '@/lib'
 import type { FirstLanguage } from '@/lib'
 import { ensureLearnerData } from '@/data/bootstrap'
+import { queueQuizResult } from '@/data/sync'
 
 type Step = 'content' | 'speaking' | 'quiz' | 'result'
 
@@ -151,14 +152,19 @@ export default function LessonStudyPage() {
       streakAction = action
     }
 
-    setProgress(userId, activeLesson.id, {
+    const progressRecord = {
       lessonId: activeLesson.id,
       score,
       speakingScore,
       passed,
       attempts: (rec?.attempts ?? 0) + 1,
       completedAt: new Date().toISOString(),
-    })
+    }
+    setProgress(userId, activeLesson.id, progressRecord)
+    if (!navigator.onLine) {
+      queueQuizResult(userId, progressRecord)
+      addNotification(userId, 'Result queued for sync', 'Your quiz result is saved on this device and will sync when you reconnect.')
+    }
 
     if (passed) {
       addNotification(

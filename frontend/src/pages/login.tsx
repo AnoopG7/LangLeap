@@ -55,7 +55,7 @@ export default function LoginPage() {
 
   const signUpForm = useForm<SignUpFormInput>({
     resolver: zodResolver(signUpFormSchema),
-    defaultValues: { email: '', password: '', fullName: '', confirmPassword: '', firstLanguage: 'hindi' },
+    defaultValues: { email: '', password: '', fullName: '', confirmPassword: '', firstLanguage: 'hindi', level: 'A1' },
   })
 
   const from = (location.state as { from?: string } | null)?.from ?? '/dashboard'
@@ -266,6 +266,30 @@ export default function LoginPage() {
                         <FormControl>
                           <PasswordInput placeholder="Minimum 8 characters" autoComplete="new-password" {...field} />
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={signUpForm.control}
+                    name="level"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Starting English level</FormLabel>
+                        <div className="flex gap-2">
+                          {(['A1', 'A2'] as const).map((level) => (
+                            <Button
+                              key={level}
+                              type="button"
+                              variant={field.value === level ? 'default' : 'outline'}
+                              size="sm"
+                              className="h-9 flex-1"
+                              onClick={() => field.onChange(level)}
+                            >
+                              {level}
+                            </Button>
+                          ))}
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}

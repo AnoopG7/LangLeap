@@ -81,7 +81,7 @@ export const ROUTE_ROLES: Record<string, LangLeapRole[]> = {
   '/progress': ['learner'],
   '/notifications': ['learner'],
   '/studio/content': ['content_writer', 'admin', 'product_head'],
-  '/studio/voice': ['voice_artist', 'admin'],
+  '/studio/voice': ['voice_artist', 'reviewer', 'admin', 'product_head'],
   '/studio/review': ['reviewer', 'admin', 'product_head'],
 }
 

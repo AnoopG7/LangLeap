@@ -100,7 +100,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       fullName: input.fullName.trim(),
       role: 'learner' as LangLeapRole,
       firstLanguage: input.firstLanguage,
-      level: 'A1',
+      level: input.level,
     }
     persistExtra([...users, created])
     set({ isLoading: false, error: null })

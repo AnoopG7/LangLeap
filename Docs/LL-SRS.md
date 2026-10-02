@@ -71,7 +71,13 @@ and reviewers of this document (the single contributor).
 
 ### 1.4 Implementation Status
 
-Planning phase — v1.0 approved; build to be tracked against LL-Project-Plan-1.0.
+The attached frontend is a functional mock of the learner and Content Studio workflows:
+authentication, bilingual lessons, speaking simulation, quiz scoring, unlock/streak rules,
+offline result queueing, authoring, voice duration checks, review gates and role-scoped routes.
+It intentionally uses localStorage and simulated media. The production target architecture,
+API boundaries, security, reliability and delivery controls are specified in
+`LL-Production-Architecture.md` and `LL-DevOps-Runbook.md`; those controls are not implied to
+exist in the frontend-only mock.
 
 ---
 

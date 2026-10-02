@@ -10,6 +10,12 @@ import {
   CardHeader,
   CardTitle,
   Input,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui'
 import { useAuthStore } from '@/stores'
 import { gateLesson, getLessons, updateLesson } from '@/data/lessons'
@@ -28,6 +34,8 @@ export default function StudioReviewPage() {
   if (!user) return null
 
   const inReview = lessons.filter((l) => l.state === 'in_review')
+  const accepted = lessons.filter((l) => l.reviewDecision === 'accepted' || l.state === 'published')
+  const rejected = lessons.filter((l) => l.reviewDecision === 'rejected')
 
   function approve(lesson: Lesson) {
     const gate = gateLesson(lesson)
@@ -35,12 +43,20 @@ export default function StudioReviewPage() {
       toast.error('Gate is failing — fix the checks before publishing')
       return
     }
-    setLessons(updateLesson(lesson.id, { state: 'published' }))
+    setLessons(updateLesson(lesson.id, {
+      state: 'published',
+      reviewDecision: 'accepted',
+      reviewNote: notes[lesson.id] ?? '',
+    }))
     toast.success(`${lesson.title} published`)
   }
 
   function reject(lesson: Lesson) {
-    setLessons(updateLesson(lesson.id, { state: 'draft' }))
+    setLessons(updateLesson(lesson.id, {
+      state: 'draft',
+      reviewDecision: 'rejected',
+      reviewNote: notes[lesson.id] || 'Returned for rework before resubmission.',
+    }))
     toast.info('Sent back to draft with notes')
   }
 
@@ -114,6 +130,50 @@ export default function StudioReviewPage() {
           )
         })
       )}
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <DecisionHistory title="Accepted & published" lessons={accepted} decision="accepted" />
+        <DecisionHistory title="Rejected / sent back" lessons={rejected} decision="rejected" />
+      </div>
     </div>
+  )
+}
+
+function DecisionHistory({
+  title,
+  lessons,
+  decision,
+}: {
+  title: string
+  lessons: Lesson[]
+  decision: 'accepted' | 'rejected'
+}) {
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base">{title} <Badge variant="secondary">{lessons.length}</Badge></CardTitle>
+        <CardDescription>Review decisions retained in the local demo history.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {lessons.length === 0 ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">No {decision} decisions yet.</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow><TableHead>Lesson</TableHead><TableHead>Version</TableHead><TableHead>Note</TableHead></TableRow>
+            </TableHeader>
+            <TableBody>
+              {lessons.map((lesson) => (
+                <TableRow key={lesson.id}>
+                  <TableCell className="font-medium">{lesson.code} · {lesson.title}</TableCell>
+                  <TableCell>v{lesson.version}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{lesson.reviewNote || (decision === 'accepted' ? 'Published for learners.' : 'Returned for rework.')}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
   )
 }
