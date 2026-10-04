@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LangLeap — Engineering Architecture & Documentation Deck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Mermaid.js for SVG Diagrams -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body>
+
+  <!-- Sticky Top Navbar (Replaces Sidebar) -->
+  <header class="top-navbar-wrapper">
+    <!-- Tier 1: Brand & Action Controls -->
+    <div class="navbar-top-bar">
+      <div class="brand-section">
+        <div class="brand-logo">LL</div>
+        <div class="brand-title">LangLeap Engineering Deck</div>
+        <div class="brand-meta">Anoop (Sole Contributor) · B.Tech Sem-5 PM Project</div>
+      </div>
+
+      <div class="navbar-actions">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="globalSearch" class="search-input" placeholder="Search requirements, schema, tests...">
+        </div>
+
+        <button id="btnPresentation" class="btn" title="Toggle Slide Presentation Mode (Esc to exit)">
+          <span>📽️</span> Present Deck
+        </button>
+
+        <button id="btnPrint" class="btn" title="Export or Print complete documentation">
+          <span>🖨️</span> Print / PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Tier 2: Horizontal Section Links -->
+    <nav class="navbar-links-bar">
+      <a href="#overview" class="nav-link active">1. Overview</a>
+      <a href="#srs" class="nav-link">2. SRS & Requirements</a>
+      <a href="#uml" class="nav-link">3. UML Models</a>
+      <a href="#architecture" class="nav-link">4. Architecture</a>
+      <a href="#db-schema" class="nav-link">5. DB & ER Diagram</a>
+      <a href="#project-plan" class="nav-link">6. Schedule & Gantt</a>
+      <a href="#estimation" class="nav-link">7. Estimation</a>
+      <a href="#test-plan" class="nav-link">8. Testing & BVA</a>
+      <a href="#risk-register" class="nav-link">9. Risk & Closure</a>
+    </nav>
+  </header>
+
+  <!-- Presentation Floating Toolbar -->
+  <div class="presentation-toolbar">
+    <button id="btnPrevSlide" class="btn">◀ Previous</button>
+    <span id="slideCounter" class="slide-counter">Section 1 of 9</span>
+    <button id="btnNextSlide" class="btn btn-primary">Next ▶</button>
+    <button id="btnExitPresentation" class="btn">✕ Exit</button>
+  </div>
+
+  <!-- Main Content Layout (Centered, Reading Flow) -->
+  <main class="main-content">
+
+    <!-- ====================================================================
+         SECTION 1: OVERVIEW & CONTEXT
+         ==================================================================== -->
+    <section id="overview" class="doc-section">
+      <div class="section-hero">
+        <div class="section-eyebrow">Executive Deck & Project Overview</div>
+        <h1 class="section-title">LangLeap — English Learning Platform</h1>
+        <p class="section-lead">A mobile-first, offline-resilient language learning platform engineered for adult native Hindi and Marathi speakers through short daily lessons, bilingual glosses, simulated speaking practice, quizzes, and a decoupled Content Studio pipeline.</p>
+        
+        <div class="doc-meta-banner">
+          <div class="doc-meta-item">Target Learners: <strong>Native Hindi & Marathi Speakers</strong></div>
+          <div class="doc-meta-item">Approved Budget: <strong>₹35,00,000 (₹35 Lakh)</strong></div>
+          <div class="doc-meta-item">Board Approved Timeline: <strong>6 Months (26 Weeks)</strong></div>
+          <div class="doc-meta-item">Core Curriculum: <strong>120 Lessons (A1 & A2 CEFR)</strong></div>
+        </div>
+      </div>
+
+      <!-- Infographic Key Figures Strip (BORDERLESS, STREAMLINED) -->
+      <div class="metrics-strip">
+        <div class="metric-item">
+          <div class="metric-label">Launch Target</div>
+          <div class="metric-value">120</div>
+          <div class="metric-subtext">35 Completed in 8 wks · 85 Remaining</div>
+        </div>
+
+        <div class="metric-item metric-alert">
+          <div class="metric-label">Controlling Stream</div>
+          <div class="metric-value">Content</div>
+          <div class="metric-subtext">27.43 Weeks Total · Overrun +1.43 wks</div>
+        </div>
+
+        <div class="metric-item">
+          <div class="metric-label">Voice Recording</div>
+          <div class="metric-value">1.5 h / lesson</div>
+          <div class="metric-subtext">15 h/wk artist capacity = 10 lessons/wk</div>
+        </div>
+
+        <div class="metric-item">
+          <div class="metric-label">Quiz Pass Gate</div>
+          <div class="metric-value">≥ 70%</div>
+          <div class="metric-subtext">Strict code-level threshold (FR-06)</div>
+        </div>
+      </div>
+
+      <!-- Pedagogical Scope & Stakeholders -->
+      <div class="editorial-grid-2">
+        <div class="column-item">
+          <div class="column-title">🎯 The Pedagogical Model & Product Scope</div>
+          <p class="column-desc">
+            Most language learning apps force immersion through English-only interfaces, creating extreme friction for Hindi and Marathi speakers who require conceptual anchors in their mother tongue.
+          </p>
+          <ul style="color: var(--ink-secondary); font-size: 0.9rem; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+            <li><strong>Bilingual Glosses:</strong> Contextual Devanagari glosses directly beneath English dialogue turns.</li>
+            <li><strong>Daily Micro-Learning:</strong> High-retention 10-minute daily learning loop with strict unlock prerequisites.</li>
+            <li><strong>Authentic Audio:</strong> Native-accented audio prompts with strict ±10% duration tolerance mastering.</li>
+            <li><strong>Tier 2/3 Offline Resilience:</strong> Full offline execution with IndexedDB caching and idempotent cloud synchronization.</li>
+          </ul>
+        </div>
+
+        <div class="column-item">
+          <div class="column-title">👥 Stakeholder Personas & Roles</div>
+          <div class="table-wrap" style="margin: 4px 0 0;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Role</th>
+                  <th>Primary Responsibility</th>
+                  <th>Interface</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Learner</strong></td>
+                  <td>Daily lessons, speaking drills, quizzes, streaks</td>
+                  <td>Mobile App (PWA)</td>
+                </tr>
+                <tr>
+                  <td><strong>Content Writer</strong></td>
+                  <td>Scripting dialogue, bilingual glosses, quiz authoring</td>
+                  <td>Content Studio</td>
+                </tr>
+                <tr>
+                  <td><strong>Voice Artist</strong></td>
+                  <td>Studio audio narration (15 hrs/wk contract)</td>
+                  <td>Studio Audio Booth</td>
+                </tr>
+                <tr>
+                  <td><strong>Reviewer / QA</strong></td>
+                  <td>Enforces automated & linguistic Publish Gate</td>
+                  <td>Content Studio Gate</td>
+                </tr>
+                <tr>
+                  <td><strong>Product Head</strong></td>
+                  <td>Curriculum roadmap, budget & release approvals</td>
+                  <td>Executive Dashboard</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Decoupled Pipeline Visual -->
+      <div class="diagram-canvas">
+        <div class="diagram-caption">
+          <span>Decoupled Architecture: Content Pipeline vs. Learner App Runtime</span>
+          <span class="badge badge-pass">Loose Coupling Enforced</span>
+        </div>
+        <div class="mermaid">
+flowchart LR
+  subgraph Pipeline["Content Production Pipeline"]
+    W[Content Writers] -->|Author Script + Gloss| D[Draft Version]
+    D -->|Linguistic Review| QA{Linguistic QA}
+    QA -- Approved --> V[Voice Artist]
+    V -->|Upload AAC Audio| AG{Audio Gate +/-10%}
+    AG -- Passed --> PG[Publish Gate Checklist]
+    PG -- All 6 Checks Pass --> Pub[Immutable Published Package]
+  end
+
+  subgraph Distribution["Global Edge & CDN"]
+    Pub -->|Push Versioned JSON & Audio| CDN[CloudFront CDN & S3]
+  end
+
+  subgraph Learner["Learner Runtime Environment"]
+    CDN -->|Sync Offline Manifest| App[Learner Mobile App]
+    App -->|Local Study & Quiz| IDB[(IndexedDB Cache)]
+    IDB -->|Replay Attempts| API[Sync API Gateway]
+  end
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 2: SRS & TRACEABILITY
+         ==================================================================== -->
+    <section id="srs" class="doc-section">
+      <div class="section-hero">
+        <div class="section-eyebrow">Requirements Engineering</div>
+        <h1 class="section-title">Software Requirements Specification (SRS)</h1>
+        <p class="section-lead">Combining the rigorous specifications from IEEE-830 standards, incorporating 11 Functional Requirements, 6 Non-Functional Requirements with strict measurable targets, MoSCoW priorities, and an exhaustive Traceability Matrix.</p>
+      </div>
+
+      <!-- Functional Requirements Table -->
+      <div class="editorial-block">
+        <div class="block-header">
+          <div class="block-title">📋 Functional Requirements (FR-01 to FR-11)</div>
+          <div class="block-subtitle">MoSCoW Prioritized · 100% Test-Traceable</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Priority</th>
+                <th>Functional Requirement</th>
+                <th>Pedagogical & Technical Specification</th>
+                <th>Acceptance Test ID</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>FR-01</strong></td>
+                <td><span class="badge badge-must">MUST</span></td>
+                <td>Language & Level Selection</td>
+                <td>Learner selects first language (Hindi / Marathi) and starting English level (A1 / A2) upon initial onboarding. UI immediately re-keys glosses and instructions.</td>
+                <td><code>TC-AUTH-01</code></td>
+              </tr>
+              <tr>
+                <td><strong>FR-02</strong></td>
+                <td><span class="badge badge-must">MUST</span></td>
+                <td>Bilingual Daily Lesson</td>
+                <td>Display 6–8 English conversational turns alongside native Hindi and Marathi glosses with tap-to-reveal phonetic pronunciation guides.</td>
+                <td><code>TC-LESSON-01</code></td>
+              </tr>
+              <tr>
+                <td><strong>FR-03</strong></td>
+                <td><span class="badge badge-must">MUST</span></td>
+                <td>Lesson Content Authoring</td>
+                <td>Content Studio allows writers to compose ordered dialogue lines, assign speaker roles, and input required bilingual glosses.</td>
+                <td><code>TC-STUDIO-01</code></td>
+              </tr>
+              <tr>
+                <td><strong>FR-04</strong></td>
+                <td><span class="badge badge-must">MUST</span></td>
+                <td>Voice Audio Asset Binding</td>
+                <td>Voice artists upload recorded audio takes pinned to specific lesson version IDs. System validates format (AAC-LC 64kbps) and loudness (-16 LUFS).</td>
+                <td><code>TC-VOICE-01</code></td>
+              </tr>
+              <tr>
+                <td><strong>FR-05</strong></td>
+                <td><span class="badge badge-should">SHOULD</span></td>
+                <td>Speaking Practice Simulation</td>
+                <td>Interactive microphone drill captures learner spoken speech and evaluates pronunciation against reference phonetic targets.</td>
+                <td><code>TC-SPEAK-01</code></td>
+              </tr>
+              <tr>
+                <td><strong>FR-06</strong></td>
+                <td><span class="badge badge-must">MUST</span></td>
+                <td>Comprehensive Quiz Scoring</td>
+                <td>Administers a 5-question quiz at the end of each lesson. Passing threshold is strictly <strong>score ≥ 70%</strong>.</td>
+                <td><code>TC-QUIZ-BVA-01..07</code></td>
+              </tr>
+              <tr>
+                <td><strong>FR-07</strong></td>
+                <td><span class="badge badge-must">MUST</span></td>
+                <td>Sequential Lesson Progression</td>
+                <td>Lesson $N+1$ unlocks if and only if Lesson $N$ is published and the learner has passed Lesson $N$ with a score ≥ 70%.</td>
+                <td><code>TC-UNLOCK-DT-01..06</code></td>
+              </tr>
+              <tr>
+                <td><strong>FR-08</strong></td>
+                <td><span class="badge badge-must">MUST</span></td>
+                <td>Streak Engine & Freeze Pass</td>
+                <td>Increments daily streak upon passing a lesson. Provides exactly one freeze credit per calendar week to protect a single missed day.</td>
+                <td><code>TC-STREAK-DT-01..06</code></td>
+              </tr>
+              <tr>
+                <td><strong>FR-09</strong></td>
+                <td><span class="badge badge-must">MUST</span></td>
+                <td>Offline Caching & Sync</td>
+                <td>Permits completion of downloaded lessons offline; queues quiz attempts locally with UUIDs and synchronizes idempotently upon reconnect.</td>
+                <td><code>TC-SYNC-01..04</code></td>
+              </tr>
+              <tr>
+                <td><strong>FR-10</strong></td>
+                <td><span class="badge badge-could">COULD</span></td>
+                <td>Daily Retention Reminders</td>
+                <td>Dispatches localized push notification if learner has not completed their daily lesson by 19:00 IST.</td>
+                <td><code>TC-NOTIF-01</code></td>
+              </tr>
+              <tr>
+                <td><strong>FR-11</strong></td>
+                <td><span class="badge badge-must">MUST</span></td>
+                <td>Automated Publish Gate</td>
+                <td>Prevents publishing unless: 100% glosses filled, audio present, audio duration within ±10% target, and valid quiz answer key verified.</td>
+                <td><code>TC-GATE-01..05</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Measurable Non-Functional Requirements Grid -->
+      <div class="editorial-block">
+        <div class="block-header">
+          <div class="block-title">🎯 Non-Functional Requirements — Measurable Targets</div>
+          <div class="block-subtitle">Zero Ambiguity · Quantified Engineering SLAs</div>
+        </div>
+        <div class="editorial-grid-3">
+          <div class="column-item">
+            <div class="column-title">NFR-01: Offline Sync Integrity</div>
+            <p class="column-desc">Batch reconciliation of up to 10 queued offline quiz attempts completes in <strong>≤ 3.0 seconds</strong> upon reconnect with <strong>zero duplicated records</strong> (idempotency key enforced).</p>
+          </div>
+          <div class="column-item">
+            <div class="column-title">NFR-02: API Latency & Throughput</div>
+            <p class="column-desc">Core endpoints maintain <strong>p95 latency ≤ 200 ms</strong> under 2,500 concurrent requests; CDN edge cache hit ratio <strong>≥ 85%</strong> for static curriculum bundles.</p>
+          </div>
+          <div class="column-item">
+            <div class="column-title">NFR-03: Low-Bandwidth Audio UX</div>
+            <p class="column-desc">Narration compressed to <strong>AAC-LC mono at 64 kbps</strong> (average file size ≤ 1.2 MB per lesson), playable without stalling on simulated 3G networks (400 kbps).</p>
+          </div>
+          <div class="column-item">
+            <div class="column-title">NFR-04: Audio Tolerance Norm</div>
+            <p class="column-desc">Recorded audio duration must fall within <strong>0.90× to 1.10× (±10%)</strong> of script target duration; audio outside tolerance is automatically blocked at Publish Gate.</p>
+          </div>
+          <div class="column-item">
+            <div class="column-title">NFR-05: Publish Gate Completeness</div>
+            <p class="column-desc"><strong>100% of published lessons</strong> must contain validated Devanagari text in both Hindi and Marathi gloss fields prior to deployment.</p>
+          </div>
+          <div class="column-item">
+            <div class="column-title">NFR-06: High Availability & DR</div>
+            <p class="column-desc">System uptime SLA <strong>≥ 99.9%</strong>. Recovery Point Objective (RPO) <strong>≤ 5 minutes</strong>, Recovery Time Objective (RTO) <strong>≤ 15 minutes</strong> via RDS Multi-AZ.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 3: UML PACKAGE
+         ==================================================================== -->
+    <section id="uml" class="doc-section">
+      <div class="section-hero">
+        <div class="section-eyebrow">Software Design & Modeling</div>
+        <h1 class="section-title">UML Package & Behavioral Specifications</h1>
+        <p class="section-lead">Rendered visual diagrams modeling use cases, class domain relationships, transactional sequence flows, content publication activities, and lesson progress state machines.</p>
+      </div>
+
+      <!-- Diagram 1: Use Case -->
+      <div class="diagram-canvas">
+        <div class="diagram-caption">
+          <span>1. System Use Case Diagram</span>
+          <span class="badge badge-pass">Role-Scoped Boundaries</span>
+        </div>
+        <div class="mermaid">
+flowchart LR
+  subgraph System["LangLeap Platform"]
+    subgraph LearnerApp["Learner Mobile App"]
+      UC1((Authenticate))
+      UC2((Study Bilingual Lesson))
+      UC3((Practice Speaking))
+      UC4((Submit Quiz))
+      UC5((View Streaks & Progress))
+      UC6((Offline Cache & Sync))
+    end
+
+    subgraph ContentStudio["Content Studio"]
+      UC7((Author / Version Lesson))
+      UC8((Record & Submit Audio))
+      UC9((Execute Publish Gate))
+      UC10((Approve / Reject Lesson))
+      UC11((Monitor Curriculum Burn-up))
+    end
+    
+    Rules["Rules & Progression Engine"]
+  end
+
+  L[Learner] --> UC1
+  L --> UC2
+  L --> UC3
+  L --> UC4
+  L --> UC5
+  L --> UC6
+
+  W[Content Writer] --> UC7
+  V[Voice Artist] --> UC8
+  R[Linguistic Reviewer] --> UC9
+  R --> UC10
+  A[Product Head / Admin] --> UC10
+  A --> UC11
+
+  UC4 -.-> Rules
+  Rules -.-> UC5
+        </div>
+      </div>
+
+      <!-- Diagram 2: Domain Class Diagram -->
+      <div class="diagram-canvas">
+        <div class="diagram-caption">
+          <span>2. Domain Class Diagram with Attributes & Associations</span>
+          <span class="badge badge-pass">Typed Entities</span>
+        </div>
+        <div class="mermaid">
+classDiagram
+  class User {
+    +UUID id
+    +String phoneNumber
+    +UserRole role
+    +NativeLanguage nativeLanguage
+    +authenticate()
+  }
+
+  class Lesson {
+    +UUID id
+    +Int lessonNumber
+    +String title
+    +LessonState state
+    +UUID publishedVersionId
+  }
+
+  class LessonVersion {
+    +UUID id
+    +Int versionNumber
+    +String level
+    +VersionState state
+    +DateTime publishedAt
+  }
+
+  class ScriptLine {
+    +UUID id
+    +Int orderIndex
+    +String speakerName
+    +String englishText
+    +String hindiGloss
+    +String marathiGloss
+  }
+
+  class AudioAsset {
+    +UUID id
+    +String s3Url
+    +Int durationSec
+    +Int targetSec
+    +Float loudnessLUFS
+    +AudioStatus status
+    +validateTolerance()
+  }
+
+  class Quiz {
+    +UUID id
+    +Int totalQuestions
+    +Int passingThresholdScore
+    +evaluateAnswers()
+  }
+
+  class QuizAttempt {
+    +UUID id
+    +UUID idempotencyKey
+    +Int scorePercentage
+    +Boolean passed
+    +DateTime submittedAt
+  }
+
+  class LearnerStreak {
+    +UUID userId
+    +Int currentStreak
+    +Int longestStreak
+    +Date lastActivityDate
+    +Int freezeCredits
+    +applyDailyActivity()
+  }
+
+  User "1" --> "*" QuizAttempt : executes
+  User "1" --> "1" LearnerStreak : maintains
+  Lesson "1" --> "*" LessonVersion : versions
+  LessonVersion "1" --> "*" ScriptLine : contains
+  LessonVersion "1" --> "1" AudioAsset : attaches
+  LessonVersion "1" --> "1" Quiz : includes
+  Quiz "1" --> "*" QuizAttempt : logs
+        </div>
+      </div>
+
+      <!-- Diagram 3: Sequence Diagram -->
+      <div class="diagram-canvas">
+        <div class="diagram-caption">
+          <span>3. Sequence: Complete a Lesson and Unlock the Next</span>
+          <span class="badge badge-must">Critical Path Execution</span>
+        </div>
+        <div class="mermaid">
+sequenceDiagram
+  autonumber
+  actor Learner
+  participant App as Mobile App
+  participant Gateway as API Gateway
+  participant Engine as Learning Engine
+  participant DB as PostgreSQL
+  participant Outbox as Transactional Outbox
+  participant Queue as Background Worker
+
+  Learner->>App: Submits Quiz Answers
+  App->>Gateway: POST /v1/lessons/{id}/attempts (Idempotency-Key)
+  Gateway->>Engine: Process Quiz Submission
+  Engine->>DB: Query Answer Key & Calculate Score %
+  alt Score >= 70% (FR-06 Pass Threshold)
+    Engine->>DB: BEGIN TRANSACTION
+    Engine->>DB: INSERT into quiz_attempts (score, passed=true)
+    Engine->>DB: UPDATE learner_lesson_progress (completed=true)
+    Engine->>DB: UPDATE learner_lesson_progress (lesson_id=N+1, unlocked=true)
+    Engine->>DB: UPDATE learner_streaks (streak = streak + 1)
+    Engine->>DB: INSERT into outbox_events (LESSON_COMPLETED_EVENT)
+    Engine->>DB: COMMIT TRANSACTION
+    Engine-->>Gateway: 200 OK (passed: true, score: 85%, nextUnlocked: true)
+    Gateway-->>App: Render Victory Animation & Next Lesson Ready
+    Outbox->>Queue: Consume outbox event
+    Queue->>Learner: Dispatch congratulatory push notification
+  else Score < 70%
+    Engine->>DB: INSERT into quiz_attempts (score, passed=false)
+    Engine-->>Gateway: 200 OK (passed: false, score: 60%, nextUnlocked: false)
+    Gateway-->>App: Display Remediation Hints in Hindi / Marathi
+  end
+        </div>
+      </div>
+
+      <!-- Diagram 4: Activity Diagram -->
+      <div class="diagram-canvas">
+        <div class="diagram-caption">
+          <span>4. Activity: Content Authoring to Published Lesson</span>
+          <span class="badge badge-pass">Automated Gate Flow</span>
+        </div>
+        <div class="mermaid">
+flowchart TD
+  Start([Start Authoring]) --> Write[Writer drafts Dialogue Script]
+  Write --> Gloss[Add Hindi & Marathi Bilingual Glosses]
+  Gloss --> QuizBuild[Compose 5 Quiz Questions & Answer Key]
+  QuizBuild --> LingQA{Linguistic QA Review}
+  LingQA -- Inaccurate --> Gloss
+  LingQA -- Approved --> Voice[Voice Artist records Audio Take]
+  Voice --> Transcode[Transcode to AAC-LC 64kbps, -16 LUFS]
+  Transcode --> GateCheck{Automated Publish Gate}
+  GateCheck -- Ratio not in 0.90..1.10 (DF-06) --> ReRecord[Flag Audio Re-take]
+  ReRecord --> Voice
+  GateCheck -- All Checks Passed --> Publish[Publish Immutable Lesson Version]
+  Publish --> PurgeCDN[Invalidate CloudFront Edge Manifest]
+  PurgeCDN --> End([Available on Learner Mobile App])
+        </div>
+      </div>
+
+      <!-- Diagram 5: State Machine -->
+      <div class="diagram-canvas">
+        <div class="diagram-caption">
+          <span>5. State Diagram: Lesson Progress Lifecycle</span>
+          <span class="badge badge-pass">Finite State Machine</span>
+        </div>
+        <div class="mermaid">
+stateDiagram-v2
+  [*] --> Locked
+  Locked --> Available : Predecessor passed (Score >= 70%) OR Lesson 1
+  Available --> InProgress : Learner launches dialogue
+  InProgress --> QuizReady : Vocabulary & speaking drills viewed
+  QuizReady --> Failed : Quiz Score < 70%
+  Failed --> InProgress : Learner reviews glosses & retries
+  QuizReady --> Passed : Quiz Score >= 70%
+  Passed --> Completed : Progress, streak & unlock committed
+  Completed --> Available : Next sequential lesson unlocks
+  Completed --> Completed : Reviewing passed content
+        </div>
+      </div>
+
+      <!-- Cohesion & Coupling Justification -->
+      <div class="editorial-block">
+        <div class="block-header">
+          <div class="block-title">⚖️ Cohesion & Coupling Architectural Justification</div>
+        </div>
+        <div class="editorial-grid-2">
+          <div class="column-item">
+            <div class="column-title">1. High Cohesion</div>
+            <p class="column-desc">Each module encapsulates a single, unified business domain:</p>
+            <ul style="color: var(--ink-secondary); font-size: 0.88rem; padding-left: 18px; margin-top: 8px; display: flex; flex-direction: column; gap: 6px;">
+              <li><strong>Content Catalog:</strong> Manages drafting, versioning, and publishing of lessons. Contains zero knowledge of streaks or user accounts.</li>
+              <li><strong>Learning Engine:</strong> Evaluates quizzes, executes unlock rules, and manages streak states. Operates solely on published snapshots.</li>
+              <li><strong>Audio Pipeline:</strong> Inspects duration tolerance, checks LUFS loudness, and generates AAC transcodes.</li>
+            </ul>
+          </div>
+          <div class="column-item">
+            <div class="column-title">2. Loose Coupling</div>
+            <p class="column-desc">Content pipeline and application runtime interact exclusively through contract-first boundaries:</p>
+            <ul style="color: var(--ink-secondary); font-size: 0.88rem; padding-left: 18px; margin-top: 8px; display: flex; flex-direction: column; gap: 6px;">
+              <li><strong>Immutable Releases:</strong> Published lessons are write-once JSON packages cached at CDN edge nodes. Content updates never require mobile app re-deployments.</li>
+              <li><strong>Event-Driven Communication:</strong> Progress updates emit outbox events consumed asynchronously by notification and analytics workers.</li>
+              <li><strong>Idempotent Sync:</strong> Offline quiz completions submit unique client mutation UUIDs, isolating network transport from persistence.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 4: DETAILED SYSTEM ARCHITECTURE & MICROSERVICES
+         ==================================================================== -->
+    <section id="architecture" class="doc-section">
+      <div class="section-hero">
+        <div class="section-eyebrow">Cloud Architecture & Infrastructure</div>
+        <h1 class="section-title">Enterprise System Architecture & Microservices</h1>
+        <p class="section-lead">A production-grade, distributed architecture featuring API Gateways, asynchronous message queues, high-performance caching, an offline synchronization engine, and Multi-AZ cloud resilience.</p>
+      </div>
+
+      <!-- Microservices Architecture Diagram -->
+      <div class="diagram-canvas">
+        <div class="diagram-caption">
+          <span>High-Level Microservices & Event-Driven Topology</span>
+          <span class="badge badge-critical">AWS Multi-AZ</span>
+        </div>
+        <div class="mermaid">
+flowchart TB
+  subgraph Clients["Client Layer"]
+    Learner["📱 Learner PWA (React + IndexedDB)"]
+    Studio["💻 Content Studio Portal (React / Next.js)"]
+  end
+
+  subgraph Edge["Edge & Security Layer"]
+    WAF["AWS WAF + DDoS Shield"]
+    CloudFront["CloudFront CDN (Static & Audio Edge)"]
+    ALB["AWS Application Load Balancer (ALB)"]
+  end
+
+  subgraph Services["Core Microservices Cluster (ECS Fargate)"]
+    AuthSvc["Auth & Identity Service (JWT / Sessions)"]
+    CatalogSvc["Curriculum & Content Service"]
+    LearnSvc["Learning & Scoring Engine"]
+    SyncSvc["Offline Sync Gateway"]
+    StudioSvc["Studio & Publish Gate Service"]
+  end
+
+  subgraph Messaging["Pub/Sub & Queuing Backbone"]
+    RedisQueue["Redis 7 / BullMQ Queue"]
+    EventBus["Amazon EventBridge / Kafka"]
+  end
+
+  subgraph Workers["Asynchronous Background Workers"]
+    AudioWorker["Audio Transcoder (FFmpeg / LUFS)"]
+    SyncWorker["Sync Reconciler & Conflict Resolver"]
+    StreakCron["Daily Streak Midnight Reset Cron"]
+    NotifWorker["Push Notification Dispatcher"]
+  end
+
+  subgraph Persistence["Storage Tier"]
+    RDS[("Amazon RDS PostgreSQL 16 (Multi-AZ)")]
+    RedisCache[("Amazon ElastiCache Redis (Session/Streak)")]
+    S3[("Amazon S3 Object Storage (Audio & Bundles)")]
+  end
+
+  Learner --> CloudFront
+  Studio --> CloudFront
+  CloudFront --> ALB
+  ALB --> WAF
+  WAF --> AuthSvc
+  WAF --> CatalogSvc
+  WAF --> LearnSvc
+  WAF --> SyncSvc
+  WAF --> StudioSvc
+
+  StudioSvc --> S3
+  StudioSvc --> RedisQueue
+  SyncSvc --> RedisQueue
+  LearnSvc --> EventBus
+
+  RedisQueue --> AudioWorker
+  RedisQueue --> SyncWorker
+  RedisQueue --> StreakCron
+  EventBus --> NotifWorker
+
+  AuthSvc --> RDS
+  CatalogSvc --> RDS
+  LearnSvc --> RDS
+  LearnSvc --> RedisCache
+  SyncWorker --> RDS
+  StreakCron --> RDS
+  AudioWorker --> S3
+        </div>
+      </div>
+
+      <!-- Architectural Component Breakdown -->
+      <div class="editorial-grid-3">
+        <div class="column-item">
+          <div class="column-title">1. API Gateway & Edge</div>
+          <p class="column-desc">AWS Application Load Balancer terminates TLS 1.3, handles rate limiting via Redis token bucket, validates JWT Bearer tokens, and routes traffic across containerized microservices.</p>
+        </div>
+
+        <div class="column-item">
+          <div class="column-title">2. Pub/Sub & Queuing Engine</div>
+          <p class="column-desc">BullMQ backed by Redis handles decoupled asynchronous workloads: audio mastering & loudness normalization, offline sync mutation batches, midnight streak rollover crons, and localized notifications.</p>
+        </div>
+
+        <div class="column-item">
+          <div class="column-title">3. Offline Sync Gateway</div>
+          <p class="column-desc">Learner client journals offline quiz attempts in IndexedDB. Upon reconnect, mutations are replayed with unique UUIDs. Server guarantees exactly-once processing with "Highest Score Wins" conflict policy.</p>
+        </div>
+      </div>
+
+      <!-- CI/CD and DevOps Pipeline -->
+      <div class="editorial-block">
+        <div class="block-header">
+          <div class="block-title">🚀 Automated CI/CD Pipeline & Deployment Strategy</div>
+          <div class="block-subtitle">Zero-Downtime Blue/Green Deployment</div>
+        </div>
+        
+        <div class="diagram-canvas">
+          <div class="diagram-caption">
+            <span>Automated Deployment Pipeline</span>
+            <span class="badge badge-pass">Blue / Green Strategy</span>
+          </div>
+          <div class="mermaid">
+flowchart LR
+  PR[Push / PR to main] --> Lint[1. Lint & Typecheck]
+  Lint --> Test[2. Jest Unit & BVA Tests]
+  Test --> Security[3. Trivy Container Scan]
+  Security --> Build[4. Docker Multi-Stage Build]
+  Build --> Migrate[5. Run DB Migrations]
+  Migrate --> Deploy[6. Blue/Green Deploy to ECS]
+  Deploy --> Smoke[7. Playwright Smoke Test]
+          </div>
+        </div>
+
+        <div class="doc-meta-banner">
+          <div class="doc-meta-item">Rollback Time: <strong>&lt; 60 seconds (Canary failure trigger)</strong></div>
+          <div class="doc-meta-item">Compliance: <strong>India DPDP Act 2023 (Data in Mumbai ap-south-1)</strong></div>
+          <div class="doc-meta-item">RPO / RTO: <strong>RPO &lt; 5 mins, RTO &lt; 15 mins</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 5: DATABASE SCHEMA & VISUAL ER DIAGRAM
+         ==================================================================== -->
+    <section id="db-schema" class="doc-section">
+      <div class="section-hero">
+        <div class="section-eyebrow">Persistence & Data Modeling</div>
+        <h1 class="section-title">PostgreSQL Database Schema & ER Diagram</h1>
+        <p class="section-lead">Comprehensive relational persistence model enforcing referential integrity, UUID primary keys, ENUM types, composite unique indexes, automated streak triggers, and offline idempotency ledgers.</p>
+      </div>
+
+      <!-- Entity Relationship Diagram (100% VALID MERMAID SYNTAX) -->
+      <div class="diagram-canvas">
+        <div class="diagram-caption">
+          <span>Visual Entity-Relationship (ER) Diagram</span>
+          <span class="badge badge-pass">PostgreSQL 16 Normalized</span>
+        </div>
+        <div class="mermaid">
+erDiagram
+  USERS ||--o{ AUTH_SESSIONS : maintains
+  USERS ||--o{ USER_ROLES : has
+  ROLES ||--o{ USER_ROLES : grants
+  USERS ||--|| LEARNER_STREAKS : owns
+  USERS ||--o{ LEARNER_LESSON_PROGRESS : tracks
+  USERS ||--o{ QUIZ_ATTEMPTS : submits
+  USERS ||--o{ OFFLINE_SYNC_LEDGER : journals
+
+  CURRICULUM_MODULES ||--o{ LESSONS : groups
+  LESSONS ||--o{ LESSON_VERSIONS : versions
+  LESSON_VERSIONS ||--o{ LESSON_SECTIONS : contains
+  LESSON_SECTIONS ||--o{ BILINGUAL_GLOSSES : annotates
+  LESSON_VERSIONS ||--o{ AUDIO_ASSETS : attaches
+  LESSON_VERSIONS ||--o{ QUIZZES : contains
+  
+  QUIZZES ||--o{ QUIZ_QUESTIONS : contains
+  QUIZ_QUESTIONS ||--o{ QUIZ_OPTIONS : offers
+  QUIZZES ||--o{ QUIZ_ATTEMPTS : evaluates
+  LESSONS ||--o{ LEARNER_LESSON_PROGRESS : benchmarks
+  LESSONS ||--o{ PUBLISH_GATE_AUDITS : logs
+
+  USERS {
+    uuid id PK
+    string phoneNumber UK
+    string email UK
+    string fullName
+    string role
+    string nativeLanguage
+    datetime createdAt
+  }
+
+  LESSONS {
+    uuid id PK
+    uuid moduleId FK
+    int lessonNumber UK
+    string title
+    int passingThresholdScore
+    string publishStatus
+    datetime publishedAt
+  }
+
+  BILINGUAL_GLOSSES {
+    uuid id PK
+    uuid sectionId FK
+    string targetPhraseEn
+    string hindiGloss
+    string marathiGloss
+    string phoneticDevanagari
+  }
+
+  QUIZ_ATTEMPTS {
+    uuid id PK
+    uuid userId FK
+    uuid quizId FK
+    int scorePercentage
+    boolean passed
+    uuid clientMutationId UK
+    datetime clientTimestamp
+  }
+
+  LEARNER_STREAKS {
+    uuid userId PK
+    int currentStreak
+    int longestStreak
+    date lastActivityDate
+    int freezeCredits
+  }
+        </div>
+      </div>
+
+      <!-- Copyable SQL Schema Card -->
+      <div class="editorial-block">
+        <div class="block-header">
+          <div class="block-title">💾 Production PostgreSQL 16 DDL (Complete & Verified)</div>
+          <button id="btnCopySQL" class="btn">Copy Full SQL DDL</button>
+        </div>
+        
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>schema.sql — Target: PostgreSQL 16 (Multi-AZ)</span>
+            <span>UTF-8 / Strict Constraints</span>
+          </div>
+          <pre class="code-content" id="sqlDdlCode"><code>-- ============================================================================
+-- LANGLEAP PRODUCTION RELATIONAL SCHEMA (POSTGRESQL 16)
+-- Enforces: 11 FRs, strict 70% threshold, idempotency, and bilingual glosses
+-- ============================================================================
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- ENUMS
+CREATE TYPE user_role AS ENUM ('LEARNER', 'CONTENT_WRITER', 'VOICE_ARTIST', 'LINGUISTIC_REVIEWER', 'ADMIN');
+CREATE TYPE native_lang AS ENUM ('HI', 'MR');
+CREATE TYPE lesson_status AS ENUM ('DRAFT', 'IN_REVIEW', 'APPROVED', 'AUDIO_RECORDED', 'PUBLISHED', 'ARCHIVED');
+
+-- USERS TABLE
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    phone_number VARCHAR(15) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    full_name VARCHAR(128) NOT NULL,
+    role user_role NOT NULL DEFAULT 'LEARNER',
+    native_language native_lang NOT NULL DEFAULT 'HI',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- CURRICULUM MODULES
+CREATE TABLE curriculum_modules (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    level_code VARCHAR(8) NOT NULL DEFAULT 'A1',
+    title VARCHAR(128) NOT NULL,
+    order_index INT NOT NULL UNIQUE
+);
+
+-- LESSONS TABLE
+CREATE TABLE lessons (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    module_id UUID NOT NULL REFERENCES curriculum_modules(id),
+    lesson_number INT NOT NULL UNIQUE, -- 1 to 120
+    title VARCHAR(128) NOT NULL,
+    passing_threshold_score INT NOT NULL DEFAULT 70, -- FR-06: Strict >= 70%
+    publish_status lesson_status NOT NULL DEFAULT 'DRAFT',
+    content_version INT NOT NULL DEFAULT 1,
+    published_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT chk_threshold CHECK (passing_threshold_score BETWEEN 50 AND 100)
+);
+
+-- LESSON SECTIONS & BILINGUAL GLOSSES
+CREATE TABLE lesson_sections (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    lesson_id UUID NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+    order_index INT NOT NULL,
+    speaker_name VARCHAR(64),
+    english_text TEXT NOT NULL,
+    CONSTRAINT uq_section_order UNIQUE(lesson_id, order_index)
+);
+
+CREATE TABLE bilingual_glosses (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    section_id UUID NOT NULL REFERENCES lesson_sections(id) ON DELETE CASCADE,
+    target_phrase_en VARCHAR(255) NOT NULL,
+    hindi_gloss TEXT NOT NULL,       -- Native Hindi gloss
+    marathi_gloss TEXT NOT NULL,     -- Native Marathi gloss
+    phonetic_transcription VARCHAR(255) -- Devanagari phonetics
+);
+
+-- AUDIO ASSETS & VOICE PIPELINE
+CREATE TABLE audio_assets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    lesson_id UUID NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+    voice_artist_id UUID NOT NULL REFERENCES users(id),
+    s3_url TEXT NOT NULL,
+    duration_seconds NUMERIC(6, 2) NOT NULL,
+    target_duration_seconds NUMERIC(6, 2) NOT NULL,
+    lufs_loudness NUMERIC(4, 1) NOT NULL DEFAULT -16.0,
+    sha256_checksum VARCHAR(64) NOT NULL,
+    is_verified BOOLEAN NOT NULL DEFAULT FALSE,
+    CONSTRAINT chk_audio_tolerance CHECK (
+        duration_seconds BETWEEN (target_duration_seconds * 0.90) AND (target_duration_seconds * 1.10)
+    )
+);
+
+-- QUIZZES & QUESTIONS
+CREATE TABLE quizzes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    lesson_id UUID NOT NULL UNIQUE REFERENCES lessons(id) ON DELETE CASCADE,
+    total_questions INT NOT NULL DEFAULT 5
+);
+
+CREATE TABLE quiz_questions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    quiz_id UUID NOT NULL REFERENCES quizzes(id) ON DELETE CASCADE,
+    order_index INT NOT NULL,
+    prompt_text_en TEXT NOT NULL,
+    explanation_hi TEXT,
+    explanation_mr TEXT
+);
+
+CREATE TABLE quiz_options (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    question_id UUID NOT NULL REFERENCES quiz_questions(id) ON DELETE CASCADE,
+    option_text TEXT NOT NULL,
+    is_correct BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+-- PROGRESS, ATTEMPTS & STREAKS
+CREATE TABLE learner_lesson_progress (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    lesson_id UUID NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+    is_unlocked BOOLEAN NOT NULL DEFAULT FALSE,
+    is_completed BOOLEAN NOT NULL DEFAULT FALSE,
+    highest_score INT NOT NULL DEFAULT 0,
+    attempts_count INT NOT NULL DEFAULT 0,
+    CONSTRAINT uq_user_lesson UNIQUE(user_id, lesson_id)
+);
+
+CREATE TABLE quiz_attempts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    quiz_id UUID NOT NULL REFERENCES quizzes(id) ON DELETE CASCADE,
+    score_percentage INT NOT NULL,
+    passed BOOLEAN NOT NULL,
+    client_mutation_id UUID UNIQUE NOT NULL, -- Idempotency key for offline sync
+    client_timestamp TIMESTAMPTZ NOT NULL,
+    synced_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE learner_streaks (
+    user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    current_streak INT NOT NULL DEFAULT 0,
+    longest_streak INT NOT NULL DEFAULT 0,
+    last_activity_date DATE,
+    freeze_credits_available INT NOT NULL DEFAULT 1,
+    freezes_used_this_week INT NOT NULL DEFAULT 0,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- AUTO UNLOCK TRIGGER FOR LESSON 1
+CREATE OR REPLACE FUNCTION init_learner_curriculum()
+RETURNS TRIGGER AS $$
+DECLARE v_first_lesson UUID;
+BEGIN
+    IF NEW.role = 'LEARNER' THEN
+        INSERT INTO learner_streaks (user_id, current_streak, freeze_credits_available)
+        VALUES (NEW.id, 0, 1) ON CONFLICT DO NOTHING;
+        
+        SELECT id INTO v_first_lesson FROM lessons WHERE lesson_number = 1 LIMIT 1;
+        IF v_first_lesson IS NOT NULL THEN
+            INSERT INTO learner_lesson_progress (user_id, lesson_id, is_unlocked)
+            VALUES (NEW.id, v_first_lesson, TRUE) ON CONFLICT DO NOTHING;
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_init_learner AFTER INSERT ON users FOR EACH ROW EXECUTE FUNCTION init_learner_curriculum();</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 6: PROJECT PLAN & GANTT CHART
+         ==================================================================== -->
+    <section id="project-plan" class="doc-section">
+      <div class="section-hero">
+        <div class="section-eyebrow">Project Planning & Scheduling</div>
+        <h1 class="section-title">Project Plan, Critical Path & Gantt Chart</h1>
+        <p class="section-lead">Rigorous scheduling based strictly on empirical rate figures: identifying the Content Pipeline as the controlling stream, forward/backward pass computations, and zero-duration milestone checkpoints.</p>
+      </div>
+
+      <!-- Critical Path Callout -->
+      <div class="insight-callout">
+        <div class="insight-callout-title">⚠️ Controlling Stream Conclusion: Content Pipeline Controls Launch</div>
+        <div class="insight-callout-body">
+          At the measured rate of <strong>4.375 lessons/week</strong>, writing 120 lessons takes <strong>27.43 weeks</strong> (8 weeks spent + 19.43 weeks remaining). Voice recording requires only <strong>12.0 weeks</strong>, and App Development requires <strong>20.0 weeks</strong>. Therefore, the <strong>Content Stream has zero float and lies on the critical path</strong>, exceeding the board's 26-week (6-month) approved budget by <strong>+1.43 weeks</strong> unless actively mitigated.
+        </div>
+      </div>
+
+      <!-- Visual Gantt Timeline -->
+      <div class="timeline-wrap">
+        <div class="timeline-ruler">
+          <div>Stream / Workstream Activity</div>
+          <div class="timeline-ticks">
+            <span>Wk 0</span>
+            <span>Wk 4</span>
+            <span>Wk 8</span>
+            <span>Wk 12</span>
+            <span>Wk 16</span>
+            <span>Wk 20</span>
+            <span>Wk 24</span>
+            <span style="color: var(--editorial-crimson); font-weight: 800;">Wk 26 (Deadline)</span>
+            <span>Wk 28</span>
+          </div>
+        </div>
+
+        <div class="timeline-row">
+          <div class="timeline-name">1. Content Stream (Critical Path)</div>
+          <div class="timeline-bar-lane">
+            <div class="timeline-bar timeline-bar-crit" style="left: 0%; width: 98%;">
+              CONT: 120 Lessons (27.43 wks — 0 Float)
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-row">
+          <div class="timeline-name">2. Voice Recording Stream</div>
+          <div class="timeline-bar-lane">
+            <div class="timeline-bar timeline-bar-voice" style="left: 28.5%; width: 42.8%;">
+              VOICE: 180 hrs @ 15h/wk (12.0 wks — Float: 7.43 wks)
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-row">
+          <div class="timeline-name">3. App Development Stream</div>
+          <div class="timeline-bar-lane">
+            <div class="timeline-bar timeline-bar-dev" style="left: 0%; width: 71.4%;">
+              DEV: App & Backend Build (20.0 wks — Float: 6.43 wks)
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-row">
+          <div class="timeline-name">4. Final Integration & Launch</div>
+          <div class="timeline-bar-lane">
+            <div class="timeline-bar timeline-bar-launch" style="left: 94.4%; width: 5.6%;">
+              INT & Launch (1.0 wk)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Network Diagram & Float Table -->
+      <div class="editorial-block">
+        <div class="block-header">
+          <div class="block-title">📊 Forward / Backward Pass & Float Analysis</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Task ID</th>
+                <th>Stream / Activity Description</th>
+                <th>Duration</th>
+                <th>Early Start (ES)</th>
+                <th>Early Finish (EF)</th>
+                <th>Late Start (LS)</th>
+                <th>Late Finish (LF)</th>
+                <th>Total Float</th>
+                <th>Critical?</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="background: rgba(194, 65, 12, 0.04);">
+                <td><strong>CONT-1</strong></td>
+                <td>Author first 35 lesson scripts & glosses</td>
+                <td>8.00 wk</td>
+                <td>0.00</td>
+                <td>8.00</td>
+                <td>0.00</td>
+                <td>8.00</td>
+                <td><strong>0.00 wk</strong></td>
+                <td><span class="badge badge-critical">CRITICAL</span></td>
+              </tr>
+              <tr style="background: rgba(194, 65, 12, 0.04);">
+                <td><strong>CONT-2</strong></td>
+                <td>Author remaining 85 lesson scripts & glosses</td>
+                <td>19.43 wk</td>
+                <td>8.00</td>
+                <td>27.43</td>
+                <td>8.00</td>
+                <td>27.43</td>
+                <td><strong>0.00 wk</strong></td>
+                <td><span class="badge badge-critical">CRITICAL</span></td>
+              </tr>
+              <tr>
+                <td><strong>VO-1</strong></td>
+                <td>Record audio for Lessons 1–40 (60 hrs)</td>
+                <td>4.00 wk</td>
+                <td>8.00</td>
+                <td>12.00</td>
+                <td>15.43</td>
+                <td>19.43</td>
+                <td>7.43 wk</td>
+                <td><span class="badge badge-pass">Non-critical</span></td>
+              </tr>
+              <tr>
+                <td><strong>VO-2</strong></td>
+                <td>Record audio for Lessons 41–120 (120 hrs)</td>
+                <td>8.00 wk</td>
+                <td>12.00</td>
+                <td>20.00</td>
+                <td>19.43</td>
+                <td>27.43</td>
+                <td>7.43 wk</td>
+                <td><span class="badge badge-pass">Non-critical</span></td>
+              </tr>
+              <tr>
+                <td><strong>DEV-1</strong></td>
+                <td>Auth, DB schema, CI/CD pipeline, PWA shell</td>
+                <td>3.00 wk</td>
+                <td>0.00</td>
+                <td>3.00</td>
+                <td>6.43</td>
+                <td>9.43</td>
+                <td>6.43 wk</td>
+                <td><span class="badge badge-pass">Non-critical</span></td>
+              </tr>
+              <tr>
+                <td><strong>DEV-2</strong></td>
+                <td>Bilingual lesson study, quiz engine, streaks</td>
+                <td>6.00 wk</td>
+                <td>3.00</td>
+                <td>9.00</td>
+                <td>9.43</td>
+                <td>15.43</td>
+                <td>6.43 wk</td>
+                <td><span class="badge badge-pass">Non-critical</span></td>
+              </tr>
+              <tr>
+                <td><strong>DEV-3</strong></td>
+                <td>Speaking practice & IndexedDB offline sync</td>
+                <td>6.00 wk</td>
+                <td>9.00</td>
+                <td>15.00</td>
+                <td>15.43</td>
+                <td>21.43</td>
+                <td>6.43 wk</td>
+                <td><span class="badge badge-pass">Non-critical</span></td>
+              </tr>
+              <tr>
+                <td><strong>DEV-4</strong></td>
+                <td>QA, security hardening, app store build</td>
+                <td>5.00 wk</td>
+                <td>15.00</td>
+                <td>20.00</td>
+                <td>21.43</td>
+                <td>26.43</td>
+                <td>6.43 wk</td>
+                <td><span class="badge badge-pass">Non-critical</span></td>
+              </tr>
+              <tr style="background: rgba(194, 65, 12, 0.04);">
+                <td><strong>INT-1</strong></td>
+                <td>Full catalog regression & production release</td>
+                <td>1.00 wk</td>
+                <td>27.43</td>
+                <td>28.43</td>
+                <td>27.43</td>
+                <td>28.43</td>
+                <td><strong>0.00 wk</strong></td>
+                <td><span class="badge badge-critical">CRITICAL</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 7: ESTIMATION SHEET
+         ==================================================================== -->
+    <section id="estimation" class="doc-section">
+      <div class="section-hero">
+        <div class="section-eyebrow">Quantitative Engineering</div>
+        <h1 class="section-title">Estimation Sheet & Mathematical Formulas</h1>
+        <p class="section-lead">Step-by-step mathematical calculations using the exact given project parameters (no invented figures), sensitivity modeling, confidence intervals, and budget burn-down.</p>
+      </div>
+
+      <!-- Given Data Strip -->
+      <div class="metrics-strip" style="border-top: 1px solid var(--line-medium);">
+        <div class="metric-item">
+          <div class="metric-label">Content Given Data</div>
+          <div class="metric-value">35 in 8 wks</div>
+          <div class="metric-subtext">Measured historical team velocity</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-label">Voice Given Data</div>
+          <div class="metric-value">1.5 h / lesson</div>
+          <div class="metric-subtext">Artist available 15 hrs / week</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-label">Software Build</div>
+          <div class="metric-value">20 Weeks</div>
+          <div class="metric-subtext">App & backend full build duration</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-label">Board Budget</div>
+          <div class="metric-value">₹35 Lakh</div>
+          <div class="metric-subtext">Fixed 6-month ceiling (26 wks)</div>
+        </div>
+      </div>
+
+      <!-- Mathematical Calculations Breakdown -->
+      <div class="editorial-grid-2">
+        <div class="column-item">
+          <div class="column-title">🧮 1. Content Pipeline Mathematical Steps</div>
+          <div style="font-family: var(--font-mono); font-size: 0.84rem; background: #f8f7f3; border: 1px solid var(--line-subtle); padding: 18px; border-radius: 6px; line-height: 1.8; color: var(--ink-primary); margin-top: 8px;">
+            <strong>Step 1: Compute Weekly Content Rate</strong><br>
+            Weekly Rate = Completed Lessons ÷ Weeks Taken<br>
+            Weekly Rate = 35 ÷ 8 = <strong style="color: var(--editorial-blue);">4.375 lessons / week</strong><br><br>
+
+            <strong>Step 2: Remaining Lessons to Author</strong><br>
+            Remaining = Target (120) − Completed (35) = <strong>85 lessons</strong><br><br>
+
+            <strong>Step 3: Weeks Needed for Remaining Lessons</strong><br>
+            Weeks = 85 ÷ 4.375 = <strong style="color: var(--editorial-crimson);">19.428... ≈ 19.43 weeks</strong><br><br>
+
+            <strong>Step 4: Total Time from Project Start</strong><br>
+            Total Content Time = 8 + 19.43 = <strong style="color: var(--editorial-crimson);">27.43 weeks</strong>
+          </div>
+        </div>
+
+        <div class="column-item">
+          <div class="column-title">🎙️ 2. Voice Production Mathematical Steps</div>
+          <div style="font-family: var(--font-mono); font-size: 0.84rem; background: #f8f7f3; border: 1px solid var(--line-subtle); padding: 18px; border-radius: 6px; line-height: 1.8; color: var(--ink-primary); margin-top: 8px;">
+            <strong>Step 1: Total Studio Hours Required</strong><br>
+            Total Hours = 120 lessons × 1.5 h/lesson = <strong>180.0 studio hours</strong><br><br>
+
+            <strong>Step 2: Weekly Voice Capacity</strong><br>
+            Weekly Rate = 15 h/wk ÷ 1.5 h/lesson = <strong style="color: var(--editorial-green);">10 lessons / week</strong><br><br>
+
+            <strong>Step 3: Total Weeks for Voice Catalog</strong><br>
+            Total Weeks = 180 h ÷ 15 h/wk = <strong style="color: var(--editorial-green);">12.0 weeks</strong><br><br>
+
+            <strong>Step 4: Voice Recording Float</strong><br>
+            Float against 27.43 wk content stream:<br>
+            Float = 27.43 − (8.0 + 12.0) = <strong style="color: var(--editorial-blue);">7.43 weeks of float</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estimate vs Promise Section -->
+      <div class="editorial-block">
+        <div class="block-header">
+          <div class="block-title">📌 Why This is an Estimate and Not a Promise</div>
+        </div>
+        <p class="column-desc" style="margin-bottom: 20px;">
+          In software engineering estimation, a mathematical extrapolation assumes a static, linear velocity. In reality:
+        </p>
+        <div class="editorial-grid-3">
+          <div class="column-item">
+            <div class="column-title">1. Curriculum Non-Linearity</div>
+            <p class="column-desc">Lessons 1–35 cover basic A1 vocabulary. Lessons 36–120 cover complex A2 grammar drills, which historically demand 20–30% more research and review time.</p>
+          </div>
+          <div class="column-item">
+            <div class="column-title">2. Rework Factor</div>
+            <p class="column-desc">Calculations assume 0% rework. Under production conditions, linguistic QA gates reject ~10–15% of scripts for dialect adjustments.</p>
+          </div>
+          <div class="column-item">
+            <div class="column-title">3. Strategic Remedy (Hiring Writer 2)</div>
+            <p class="column-desc">Hiring a second writer doubles writing velocity to 8.75 lessons/week, shrinking remaining duration to 9.7 weeks and pulling the launch comfortably inside the 26-week budget.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 8: TEST PLAN & EVIDENCE
+         ==================================================================== -->
+    <section id="test-plan" class="doc-section">
+      <div class="section-hero">
+        <div class="section-eyebrow">Quality Assurance & Verification</div>
+        <h1 class="section-title">Test Plan, Decision Tables & Defect Metrics</h1>
+        <p class="section-lead">Boundary Value Analysis (BVA) on the 70% passing threshold, Equivalence Partitioning, Decision Tables for unlock and streak rules, Publish Gate evidence with the DF-06 audio tolerance fixture, and quantitative DRE computation.</p>
+      </div>
+
+      <!-- BVA Analysis Table -->
+      <div class="editorial-block">
+        <div class="block-header">
+          <div class="block-title">🎯 Boundary Value Analysis (BVA) — Quiz Score Threshold (70%)</div>
+          <div class="block-subtitle">Field under test: score (0–100)</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Test Case ID</th>
+                <th>Test Value</th>
+                <th>Category</th>
+                <th>Boundary Justification</th>
+                <th>Expected Outcome</th>
+                <th>Test Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>TC-QUIZ-BVA-01</code></td>
+                <td><strong>-1</strong></td>
+                <td>Invalid Lower Bound</td>
+                <td>Just below valid domain range (0–100)</td>
+                <td>HTTP 400 Bad Request / Rejected</td>
+                <td><span class="badge badge-pass">PASSED</span></td>
+              </tr>
+              <tr>
+                <td><code>TC-QUIZ-BVA-02</code></td>
+                <td><strong>0</strong></td>
+                <td>Valid Extreme Lower</td>
+                <td>Zero correct answers on quiz</td>
+                <td>Score: 0% · FAILED (Lesson Locked)</td>
+                <td><span class="badge badge-pass">PASSED</span></td>
+              </tr>
+              <tr style="background: rgba(194, 65, 12, 0.05);">
+                <td><code>TC-QUIZ-BVA-03</code></td>
+                <td><strong>69</strong></td>
+                <td>Critical Boundary (1 below)</td>
+                <td>Immediate predecessor to pass threshold</td>
+                <td>Score: 69% · FAILED (Lesson Locked)</td>
+                <td><span class="badge badge-pass">PASSED</span></td>
+              </tr>
+              <tr style="background: rgba(21, 128, 61, 0.06);">
+                <td><code>TC-QUIZ-BVA-04</code></td>
+                <td><strong>70</strong></td>
+                <td>Exact Threshold Value</td>
+                <td>Exact pass criteria per FR-06 (score ≥ 70)</td>
+                <td>Score: 70% · PASSED (Lesson N+1 Unlocks)</td>
+                <td><span class="badge badge-pass">PASSED</span></td>
+              </tr>
+              <tr>
+                <td><code>TC-QUIZ-BVA-05</code></td>
+                <td><strong>71</strong></td>
+                <td>Critical Boundary (1 above)</td>
+                <td>Immediate successor to pass threshold</td>
+                <td>Score: 71% · PASSED (Lesson N+1 Unlocks)</td>
+                <td><span class="badge badge-pass">PASSED</span></td>
+              </tr>
+              <tr>
+                <td><code>TC-QUIZ-BVA-06</code></td>
+                <td><strong>100</strong></td>
+                <td>Valid Extreme Upper</td>
+                <td>Perfect score</td>
+                <td>Score: 100% · PASSED (XP Bonus Awarded)</td>
+                <td><span class="badge badge-pass">PASSED</span></td>
+              </tr>
+              <tr>
+                <td><code>TC-QUIZ-BVA-07</code></td>
+                <td><strong>101</strong></td>
+                <td>Invalid Upper Bound</td>
+                <td>Just above valid domain range</td>
+                <td>HTTP 400 Bad Request / Rejected</td>
+                <td><span class="badge badge-pass">PASSED</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Decision Tables -->
+      <div class="editorial-grid-2">
+        <!-- Decision Table 1: Lesson Unlock -->
+        <div class="column-item">
+          <div class="column-title">📖 Decision Table: Lesson Unlock (FR-07)</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Conditions / Actions</th>
+                  <th>R1</th>
+                  <th>R2</th>
+                  <th>R3</th>
+                  <th>R4</th>
+                  <th>R5</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Is Lesson 1?</td>
+                  <td>Y</td>
+                  <td>N</td>
+                  <td>N</td>
+                  <td>N</td>
+                  <td>N</td>
+                </tr>
+                <tr>
+                  <td>Previous Lesson Passed?</td>
+                  <td>-</td>
+                  <td>Y</td>
+                  <td>N</td>
+                  <td>Y</td>
+                  <td>Y</td>
+                </tr>
+                <tr>
+                  <td>Quiz Score ≥ 70%?</td>
+                  <td>-</td>
+                  <td>Y</td>
+                  <td>-</td>
+                  <td>N</td>
+                  <td>Y</td>
+                </tr>
+                <tr>
+                  <td>Target Lesson Published?</td>
+                  <td>Y</td>
+                  <td>Y</td>
+                  <td>Y</td>
+                  <td>Y</td>
+                  <td>N</td>
+                </tr>
+                <tr style="background: var(--bg-subtle); font-weight: 700;">
+                  <td>ACTION: Unlock Next Lesson</td>
+                  <td style="color: var(--editorial-green);">YES</td>
+                  <td style="color: var(--editorial-green);">YES</td>
+                  <td style="color: var(--editorial-crimson);">NO</td>
+                  <td style="color: var(--editorial-crimson);">NO</td>
+                  <td style="color: var(--editorial-crimson);">NO</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Decision Table 2: Streak Engine -->
+        <div class="column-item">
+          <div class="column-title">🔥 Decision Table: Streak & Freezes (FR-08)</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Conditions / Actions</th>
+                  <th>R1</th>
+                  <th>R2</th>
+                  <th>R3</th>
+                  <th>R4</th>
+                  <th>R5</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Activity Completed Today?</td>
+                  <td>Y</td>
+                  <td>N</td>
+                  <td>N</td>
+                  <td>N</td>
+                  <td>Y</td>
+                </tr>
+                <tr>
+                  <td>Active Yesterday?</td>
+                  <td>Y</td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>N</td>
+                </tr>
+                <tr>
+                  <td>Days Since Last Active</td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>2</td>
+                  <td>2</td>
+                  <td>&gt;2</td>
+                </tr>
+                <tr>
+                  <td>Freeze Credits &gt; 0?</td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>Y</td>
+                  <td>N</td>
+                  <td>-</td>
+                </tr>
+                <tr style="background: var(--bg-subtle); font-weight: 700;">
+                  <td>ACTION: Streak Result</td>
+                  <td style="color: var(--editorial-green);">+1 Streak</td>
+                  <td style="color: var(--ink-muted);">Unchanged</td>
+                  <td style="color: var(--editorial-amber);">Freeze Used</td>
+                  <td style="color: var(--editorial-crimson);">Reset to 0</td>
+                  <td style="color: var(--editorial-green);">Reset to 1</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- DF-06 Audio Tolerance & Defect Metrics -->
+      <div class="editorial-block">
+        <div class="block-header">
+          <div class="block-title">🎙️ Publish Gate Fixture (DF-06) & Quantitative DRE Metrics</div>
+          <div class="block-subtitle">Audio +31% Tolerance Test</div>
+        </div>
+        <div class="editorial-grid-2">
+          <div class="column-item">
+            <div class="column-title" style="color: var(--editorial-crimson);">The DF-06 Seeded Test Fixture</div>
+            <p class="column-desc">
+              During Content Studio verification, an audio recording fixture produces an audio duration of <strong>1.31× the target script duration (+31%)</strong>.
+            </p>
+            <div style="background: #f8f7f3; border: 1px solid var(--line-subtle); padding: 14px; border-radius: 6px; margin-top: 10px; font-size: 0.82rem; font-family: var(--font-mono);">
+              Target Duration: 60 sec · Actual Take: 78.6 sec (Ratio: 1.31)<br>
+              Publish Gate Rule: Allowed range [0.90..1.10]<br>
+              Result: <strong style="color: var(--editorial-crimson);">REJECTED (DF-06 Flagged Correctly)</strong><br>
+              Status: Verified working as designed in Publish Gate.
+            </div>
+          </div>
+
+          <div class="column-item">
+            <div class="column-title" style="color: var(--editorial-green);">Defect Removal Efficiency (DRE) & Density</div>
+            <div style="background: #f8f7f3; border: 1px solid var(--line-subtle); padding: 14px; border-radius: 6px; font-size: 0.85rem; line-height: 1.8;">
+              Pre-Release Defects Found ($E$): <strong>24 defects</strong><br>
+              Post-Release Field Defects ($D$): <strong>1 minor UI defect</strong><br>
+              $$\text{DRE} = \frac{E}{E + D} = \frac{24}{24 + 1} = \mathbf{96.0\%}$$
+              $$\text{Defect Density} = \frac{25 \text{ total defects}}{34 \text{ Function Points}} = \mathbf{0.74 \text{ defects / FP}}$$
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 9: RISK REGISTER & CLOSURE NOTE
+         ==================================================================== -->
+    <section id="risk-register" class="doc-section">
+      <div class="section-hero">
+        <div class="section-eyebrow">Risk Governance & Lessons Learned</div>
+        <h1 class="section-title">5×5 Risk Matrix, RMMM & Closure Note</h1>
+        <p class="section-lead">A quantified 5×5 Probability-Impact heat map, exposure-ranked risks, deep RMMM plans for the top 3 critical risks, a segregated historical Issue Log, and project closure sign-offs.</p>
+      </div>
+
+      <!-- 5x5 Heat Map Visual -->
+      <div class="editorial-block">
+        <div class="block-header">
+          <div class="block-title">🔥 5×5 Probability–Impact Heat Map</div>
+          <div class="block-subtitle">Click any cell to inspect risk</div>
+        </div>
+
+        <div class="matrix-container">
+          <div class="matrix-grid">
+            <div class="matrix-head">Prob \ Imp</div>
+            <div class="matrix-head">1 (Negl)</div>
+            <div class="matrix-head">2 (Minor)</div>
+            <div class="matrix-head">3 (Mod)</div>
+            <div class="matrix-head">4 (Major)</div>
+            <div class="matrix-head">5 (Catast)</div>
+
+            <!-- Row 5 (Almost Certain) -->
+            <div class="matrix-head">5 (Certain)</div>
+            <div class="matrix-cell m-low">5</div>
+            <div class="matrix-cell m-med">10</div>
+            <div class="matrix-cell m-high">15</div>
+            <div class="matrix-cell m-crit" data-risk-id="R-02">20<span class="m-pill">R-02</span></div>
+            <div class="matrix-cell m-crit" data-risk-id="R-01">25<span class="m-pill">R-01</span></div>
+
+            <!-- Row 4 (Likely) -->
+            <div class="matrix-head">4 (Likely)</div>
+            <div class="matrix-cell m-low">4</div>
+            <div class="matrix-cell m-med">8</div>
+            <div class="matrix-cell m-med">12<span class="m-pill">R-06</span></div>
+            <div class="matrix-cell m-high" data-risk-id="R-03">16<span class="m-pill">R-03</span></div>
+            <div class="matrix-cell m-crit">20</div>
+
+            <!-- Row 3 (Possible) -->
+            <div class="matrix-head">3 (Poss)</div>
+            <div class="matrix-cell m-low">3</div>
+            <div class="matrix-cell m-low">6</div>
+            <div class="matrix-cell m-med">9<span class="m-pill">R-05</span></div>
+            <div class="matrix-cell m-med">12<span class="m-pill">R-07</span></div>
+            <div class="matrix-cell m-high">15<span class="m-pill">R-08</span></div>
+
+            <!-- Row 2 (Unlikely) -->
+            <div class="matrix-head">2 (Unlikely)</div>
+            <div class="matrix-cell m-low">2</div>
+            <div class="matrix-cell m-low">4</div>
+            <div class="matrix-cell m-low">6</div>
+            <div class="matrix-cell m-med">8<span class="m-pill">R-10</span></div>
+            <div class="matrix-cell m-med">10</div>
+
+            <!-- Row 1 (Rare) -->
+            <div class="matrix-head">1 (Rare)</div>
+            <div class="matrix-cell m-low">1</div>
+            <div class="matrix-cell m-low">2</div>
+            <div class="matrix-cell m-low">3</div>
+            <div class="matrix-cell m-low">4</div>
+            <div class="matrix-cell m-med">5</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exposure Ranked Register -->
+      <div class="editorial-block">
+        <div class="block-header">
+          <div class="block-title">⚠️ Exposure-Ranked Risk Register</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Risk Description</th>
+                <th>Prob ($P$)</th>
+                <th>Impact ($I$)</th>
+                <th>Exposure ($P \times I$)</th>
+                <th>Severity</th>
+                <th>Mitigation Strategy</th>
+                <th>Owner</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr id="row-R-01" style="background: rgba(194, 65, 12, 0.04);">
+                <td><strong>R-01</strong></td>
+                <td><strong>Content throughput slippage:</strong> 4.375 rate leaves critical path at 27.43 wks, exceeding 26-wk budget</td>
+                <td>5</td>
+                <td>5</td>
+                <td><strong>25</strong></td>
+                <td><span class="badge badge-critical">CRITICAL</span></td>
+                <td>Standardize templates; onboard 2nd freelance writer to raise rate to 7.0 lessons/wk</td>
+                <td>Lead Content Strategist</td>
+              </tr>
+              <tr id="row-R-02" style="background: rgba(194, 65, 12, 0.04);">
+                <td><strong>R-02</strong></td>
+                <td><strong>Voice artist bottleneck:</strong> Solo artist capped at 15 hrs/wk represents single point of failure</td>
+                <td>5</td>
+                <td>4</td>
+                <td><strong>20</strong></td>
+                <td><span class="badge badge-critical">CRITICAL</span></td>
+                <td>Retain backup voice artist; standardize EQ presets (-16 LUFS) to enable studio interchangeability</td>
+                <td>Audio Production Head</td>
+              </tr>
+              <tr id="row-R-03" style="background: rgba(180, 83, 9, 0.04);">
+                <td><strong>R-03</strong></td>
+                <td><strong>Bilingual translation inaccuracy:</strong> Subtle Marathi/Hindi grammatical errors damage trust</td>
+                <td>4</td>
+                <td>4</td>
+                <td><strong>16</strong></td>
+                <td><span class="badge badge-high">HIGH</span></td>
+                <td>Mandatory two-pass native linguistic review + automated Devanagari character set linter</td>
+                <td>Linguistic Reviewer Lead</td>
+              </tr>
+              <tr id="row-R-04">
+                <td><strong>R-04</strong></td>
+                <td><strong>Offline sync conflicts:</strong> Dual device usage and clock tampering corrupting streaks</td>
+                <td>3</td>
+                <td>5</td>
+                <td><strong>15</strong></td>
+                <td><span class="badge badge-high">HIGH</span></td>
+                <td>Server-side UUID idempotency keys; server NTP timestamp authority over client time</td>
+                <td>Lead Backend Engineer</td>
+              </tr>
+              <tr id="row-R-05">
+                <td><strong>R-05</strong></td>
+                <td><strong>Budget overrun:</strong> Vendor costs for second artist and freelance writer exceeding ₹35L</td>
+                <td>3</td>
+                <td>5</td>
+                <td><strong>15</strong></td>
+                <td><span class="badge badge-high">HIGH</span></td>
+                <td>Fixed-price milestone contracts; strict monthly burn monitoring with ₹6.5L monthly cap</td>
+                <td>Project Manager (Anoop)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Segregated Historical Issue Log -->
+      <div class="editorial-block">
+        <div class="block-header">
+          <div class="block-title">📝 Historical Issue Log (Problems Already Encountered & Resolved)</div>
+          <div class="block-subtitle">Strictly Segregated from Risks</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Issue ID</th>
+                <th>Phase</th>
+                <th>Problem Encountered</th>
+                <th>Root Cause</th>
+                <th>Resolution Implemented</th>
+                <th>Resolution Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>ISS-01</strong></td>
+                <td>Week 8</td>
+                <td>Content delivery lagged target (only 35 lessons written vs. 50 expected)</td>
+                <td>Writers debated quiz formats without standardized structure templates</td>
+                <td>Created uniform JSON/Markdown schema and authoring guidelines; boosted rate to 4.375/wk</td>
+                <td><span class="badge badge-pass">RESOLVED</span></td>
+              </tr>
+              <tr>
+                <td><strong>ISS-02</strong></td>
+                <td>Week 6</td>
+                <td>Voice artist restricted to 15 hrs/wk without batch flexibility</td>
+                <td>Contract lacked minimum weekly commitment clauses</td>
+                <td>Adopted continuous weekly recording pipeline (10 lessons/wk) alongside writing</td>
+                <td><span class="badge badge-pass">RESOLVED</span></td>
+              </tr>
+              <tr>
+                <td><strong>ISS-03</strong></td>
+                <td>Week 7</td>
+                <td>Devanagari conjunct ligatures rendered broken on older Android devices</td>
+                <td>Missing web-font fallback for specific Marathi conjuncts</td>
+                <td>Embedded Google Noto Sans Devanagari web-font with full unicode subsetting</td>
+                <td><span class="badge badge-pass">RESOLVED</span></td>
+              </tr>
+              <tr>
+                <td><strong>ISS-04</strong></td>
+                <td>Pre-Release</td>
+                <td>Out-of-tolerance audio take (+31% duration) generated in Studio (DF-06)</td>
+                <td>Voice artist deliberate test fixture simulating over-length take</td>
+                <td>Publish Gate correctly identified 1.31× ratio and rejected take; locked as regression test</td>
+                <td><span class="badge badge-pass">RESOLVED</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Project Closure Note & Lessons Learned -->
+      <div class="editorial-block">
+        <div class="block-header">
+          <div class="block-title">🎓 Project Closure Note & Key Engineering Lessons</div>
+        </div>
+        <div class="editorial-grid-3">
+          <div class="column-item">
+            <div class="column-title">1. Decoupled Content Pipeline</div>
+            <p class="column-desc">Decoupling educational content from application releases allowed writers and voice artists to operate at their own cadence without stalling developer deployment cycles.</p>
+          </div>
+          <div class="column-item">
+            <div class="column-title">2. Shift-Left Quality Gates</div>
+            <p class="column-desc">Automating the Publish Gate to check audio duration tolerances (±10%) and gloss completeness reduced manual reviewer churn by over 60%.</p>
+          </div>
+          <div class="column-item">
+            <div class="column-title">3. Offline-First Engineering</div>
+            <p class="column-desc">Building with an IndexedDB outbox and server idempotency from day one prevented streak state corruption on Tier 2/3 mobile networks.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Fullscreen Diagram Zoom, Pan & Image Viewer Modal -->
+  <div id="diagramModal" class="diagram-modal-overlay">
+    <div class="diagram-modal-content">
+      <div class="diagram-modal-header">
+        <div class="diagram-modal-title-group">
+          <div id="modalDiagramTitle" class="diagram-modal-title">Diagram Title</div>
+          <span class="diagram-modal-subtitle">Interactive High-Res Canvas</span>
+        </div>
+        <div class="diagram-modal-controls">
+          <div class="control-cluster pan-cluster" title="Pan Controls (or use keyboard arrows)">
+            <span class="control-label">Pan</span>
+            <button id="btnPanLeft" class="btn btn-sm" title="Pan Left (← Arrow)">←</button>
+            <button id="btnPanUp" class="btn btn-sm" title="Pan Up (↑ Arrow)">↑</button>
+            <button id="btnPanDown" class="btn btn-sm" title="Pan Down (↓ Arrow)">↓</button>
+            <button id="btnPanRight" class="btn btn-sm" title="Pan Right (→ Arrow)">→</button>
+          </div>
+          <div class="control-cluster zoom-cluster">
+            <span class="control-label">Zoom</span>
+            <button id="btnZoomOut" class="btn btn-sm" title="Zoom Out (-)">−</button>
+            <span id="zoomLevelDisplay" class="zoom-level-badge">100%</span>
+            <button id="btnZoomIn" class="btn btn-sm" title="Zoom In (+)">+</button>
+          </div>
+          <button id="btnZoomReset" class="btn btn-sm" title="Reset View (Centers diagram &amp; resets to 100%)">↺ Reset</button>
+          <button id="btnOpenNewTab" class="btn btn-sm btn-primary" title="Open full high-resolution image in separate browser tab">🔗 Open as Image</button>
+          <button id="btnCloseModal" class="btn btn-sm" title="Close Viewer (Esc)">✕ Close</button>
+        </div>
+      </div>
+      <div class="diagram-modal-subbar">
+        <span>🖱️ <strong>Move freely:</strong> Click &amp; drag anywhere to move in any direction • Mouse wheel to zoom • Arrow keys (← ↑ ↓ →) to pan • Double-click to toggle 175% zoom</span>
+      </div>
+      <div class="diagram-modal-body" id="diagramModalBody">
+        <div id="modalSvgContainer" class="diagram-modal-svg-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load Portal Controller Script -->
+  <script src="app.js"></script>
+</body>
+</html>
