@@ -720,6 +720,9 @@ tr:hover td {
   max-width: none;
   max-height: none;
   display: block;
+  shape-rendering: geometricPrecision;
+  text-rendering: geometricPrecision;
+  vector-effect: non-scaling-stroke;
 }
 
 /* ==========================================================================
@@ -906,7 +909,21 @@ body.presentation-mode .presentation-toolbar {
 }
 
 body.presentation-mode .top-navbar-wrapper {
-  opacity: 0.9;
+  display: none;
+}
+
+body.presentation-mode {
+  overflow-y: auto;
+  background: var(--bg-canvas);
+}
+
+body.presentation-mode .main-content {
+  padding-top: 32px;
+}
+
+body.presentation-mode .doc-section {
+  min-height: 100vh;
+  scroll-margin-top: 24px;
 }
 
 .slide-counter {

@@ -170,9 +170,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Clone SVG into modal
     const clonedSvg = svg.cloneNode(true);
+    const viewBox = clonedSvg.getAttribute('viewBox');
+    const viewBoxParts = viewBox ? viewBox.split(/\s+/).map(Number) : [];
+    const intrinsicWidth = viewBoxParts.length === 4 ? viewBoxParts[2] : Number.parseFloat(clonedSvg.getAttribute('width'));
+    const intrinsicHeight = viewBoxParts.length === 4 ? viewBoxParts[3] : Number.parseFloat(clonedSvg.getAttribute('height'));
+    clonedSvg.removeAttribute('width');
+    clonedSvg.removeAttribute('height');
     clonedSvg.style.maxWidth = 'none';
-    clonedSvg.style.height = 'auto';
-    clonedSvg.style.minWidth = '680px';
+    clonedSvg.style.maxHeight = 'none';
+    clonedSvg.style.width = `${Number.isFinite(intrinsicWidth) ? intrinsicWidth : 1200}px`;
+    clonedSvg.style.height = `${Number.isFinite(intrinsicHeight) ? intrinsicHeight : 800}px`;
+    clonedSvg.style.shapeRendering = 'geometricPrecision';
+    clonedSvg.style.textRendering = 'geometricPrecision';
     modalSvgContainer.appendChild(clonedSvg);
 
     // Prepare Data URL for Open in New Tab
@@ -311,15 +320,31 @@ document.addEventListener('DOMContentLoaded', () => {
   // ==========================================================================
   const sectionIds = Array.from(sections).map(s => s.id);
 
-  function togglePresentationMode(enable) {
+  async function togglePresentationMode(enable) {
     if (enable) {
       document.body.classList.add('presentation-mode');
       currentSlideIndex = 0;
       goToSlide(0);
+      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+        try {
+          await document.documentElement.requestFullscreen();
+        } catch (error) {
+          // Fullscreen can be denied by browser policy; presentation mode remains usable.
+        }
+      }
     } else {
       document.body.classList.remove('presentation-mode');
+      if (document.fullscreenElement && document.exitFullscreen) {
+        await document.exitFullscreen();
+      }
     }
   }
+
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement && document.body.classList.contains('presentation-mode')) {
+      document.body.classList.remove('presentation-mode');
+    }
+  });
 
   function goToSlide(index) {
     if (index >= 0 && index < sections.length) {
@@ -335,13 +360,13 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnPresentation) {
     btnPresentation.addEventListener('click', () => {
       const isMode = document.body.classList.contains('presentation-mode');
-      togglePresentationMode(!isMode);
+      void togglePresentationMode(!isMode);
     });
   }
 
   if (btnExitPresentation) {
     btnExitPresentation.addEventListener('click', () => {
-      togglePresentationMode(false);
+      void togglePresentationMode(false);
     });
   }
 
@@ -405,7 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         if (currentSlideIndex > 0) goToSlide(currentSlideIndex - 1);
       } else if (e.key === 'Escape') {
-        togglePresentationMode(false);
+        void togglePresentationMode(false);
       }
     }
   });

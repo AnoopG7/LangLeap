@@ -92,7 +92,7 @@
         <div class="metric-item metric-alert">
           <div class="metric-label">Controlling Stream</div>
           <div class="metric-value">Content</div>
-          <div class="metric-subtext">27.43 Weeks Total · Overrun +1.43 wks</div>
+          <div class="metric-subtext">24 wks planned · 2 wks launch buffer</div>
         </div>
 
         <div class="metric-item">
@@ -612,7 +612,7 @@ stateDiagram-v2
       <div class="diagram-canvas">
         <div class="diagram-caption">
           <span>High-Level Microservices & Event-Driven Topology</span>
-          <span class="badge badge-critical">AWS Multi-AZ</span>
+          <span class="badge badge-critical">AWS EC2 Multi-AZ</span>
         </div>
         <div class="mermaid">
 flowchart TB
@@ -627,7 +627,9 @@ flowchart TB
     ALB["AWS Application Load Balancer (ALB)"]
   end
 
-  subgraph Services["Core Microservices Cluster (ECS Fargate)"]
+  subgraph Services["Backend Services on EC2 Auto Scaling Group"]
+    EC2API["EC2 Backend API Servers (Node.js / TypeScript)"]
+    EC2Workers["EC2 Worker Servers (Background Jobs)"]
     AuthSvc["Auth & Identity Service (JWT / Sessions)"]
     CatalogSvc["Curriculum & Content Service"]
     LearnSvc["Learning & Scoring Engine"]
@@ -645,6 +647,7 @@ flowchart TB
     SyncWorker["Sync Reconciler & Conflict Resolver"]
     StreakCron["Daily Streak Midnight Reset Cron"]
     NotifWorker["Push Notification Dispatcher"]
+    NotifyProvider["Email / Push Provider"]
   end
 
   subgraph Persistence["Storage Tier"]
@@ -655,31 +658,41 @@ flowchart TB
 
   Learner --> CloudFront
   Studio --> CloudFront
-  CloudFront --> ALB
-  ALB --> WAF
-  WAF --> AuthSvc
-  WAF --> CatalogSvc
-  WAF --> LearnSvc
-  WAF --> SyncSvc
-  WAF --> StudioSvc
-
-  StudioSvc --> S3
-  StudioSvc --> RedisQueue
+  CloudFront --> WAF --> ALB --> EC2API
+  EC2API --> AuthSvc & CatalogSvc & LearnSvc & SyncSvc & StudioSvc
+  EC2API --> RedisCache
+  AuthSvc & CatalogSvc & LearnSvc & SyncSvc & StudioSvc --> RDS
+  CatalogSvc --> S3
+  StudioSvc --> S3 & RedisQueue
   SyncSvc --> RedisQueue
   LearnSvc --> EventBus
-
-  RedisQueue --> AudioWorker
-  RedisQueue --> SyncWorker
-  RedisQueue --> StreakCron
-  EventBus --> NotifWorker
-
-  AuthSvc --> RDS
-  CatalogSvc --> RDS
-  LearnSvc --> RDS
-  LearnSvc --> RedisCache
-  SyncWorker --> RDS
-  StreakCron --> RDS
+  RedisQueue --> EC2Workers
+  EventBus --> EC2Workers
+  EC2Workers --> AudioWorker & SyncWorker & StreakCron & NotifWorker
   AudioWorker --> S3
+  SyncWorker & StreakCron --> RDS
+  NotifWorker --> NotifyProvider
+        </div>
+      </div>
+
+      <div class="editorial-block">
+        <div class="block-header">
+          <div class="block-title">🔄 Complete Product User Flows</div>
+          <div class="block-subtitle">The runtime serves role workflows, not isolated infrastructure</div>
+        </div>
+        <div class="editorial-grid-3">
+          <div class="column-item">
+            <div class="column-title">Learner Journey</div>
+            <p class="column-desc">Authenticate → receive language profile → browse published catalog → open bilingual lesson → optionally practise speaking → submit quiz → server scores and persists attempt → progress, streak and next lesson unlock → notification is delivered. Offline attempts queue in IndexedDB and replay idempotently after reconnect.</p>
+          </div>
+          <div class="column-item">
+            <div class="column-title">Content Production Journey</div>
+            <p class="column-desc">Writer creates versioned draft → bilingual and quiz validation → reviewer task → voice artist records signed upload → worker checks duration, loudness and checksum → reviewer approves or rejects → publish gate stores every check → immutable lesson enters the learner catalog.</p>
+          </div>
+          <div class="column-item">
+            <div class="column-title">Governance Journey</div>
+            <p class="column-desc">Admin manages roles, assignments and operational exceptions. Product head reviews throughput, quality, completion, defects, release health and schedule buffer. Every privileged decision is authorized server-side and written to the audit log.</p>
+          </div>
         </div>
       </div>
 
@@ -720,7 +733,7 @@ flowchart LR
   Test --> Security[3. Trivy Container Scan]
   Security --> Build[4. Docker Multi-Stage Build]
   Build --> Migrate[5. Run DB Migrations]
-  Migrate --> Deploy[6. Blue/Green Deploy to ECS]
+  Migrate --> Deploy[6. Rolling Deploy to EC2 Auto Scaling Group]
   Deploy --> Smoke[7. Playwright Smoke Test]
           </div>
         </div>
@@ -751,72 +764,191 @@ flowchart LR
         </div>
         <div class="mermaid">
 erDiagram
-  USERS ||--o{ AUTH_SESSIONS : maintains
   USERS ||--o{ USER_ROLES : has
   ROLES ||--o{ USER_ROLES : grants
-  USERS ||--|| LEARNER_STREAKS : owns
-  USERS ||--o{ LEARNER_LESSON_PROGRESS : tracks
-  USERS ||--o{ QUIZ_ATTEMPTS : submits
-  USERS ||--o{ OFFLINE_SYNC_LEDGER : journals
-
-  CURRICULUM_MODULES ||--o{ LESSONS : groups
+  USERS ||--o{ SESSIONS : authenticates
+  USERS ||--o{ CONSENTS : grants
+  USERS ||--o{ DEVICES : registers
+  COURSES ||--o{ LESSONS : contains
   LESSONS ||--o{ LESSON_VERSIONS : versions
-  LESSON_VERSIONS ||--o{ LESSON_SECTIONS : contains
-  LESSON_SECTIONS ||--o{ BILINGUAL_GLOSSES : annotates
-  LESSON_VERSIONS ||--o{ AUDIO_ASSETS : attaches
-  LESSON_VERSIONS ||--o{ QUIZZES : contains
-  
-  QUIZZES ||--o{ QUIZ_QUESTIONS : contains
+  LESSON_VERSIONS ||--o{ SCRIPT_LINES : contains
+  LESSON_VERSIONS ||--o{ QUIZ_QUESTIONS : contains
   QUIZ_QUESTIONS ||--o{ QUIZ_OPTIONS : offers
-  QUIZZES ||--o{ QUIZ_ATTEMPTS : evaluates
-  LESSONS ||--o{ LEARNER_LESSON_PROGRESS : benchmarks
-  LESSONS ||--o{ PUBLISH_GATE_AUDITS : logs
+  LESSON_VERSIONS ||--o{ AUDIO_ASSETS : has
+  LESSON_VERSIONS ||--o{ CONTENT_REVIEWS : receives
+  LESSON_VERSIONS ||--o{ PUBLISH_GATE_CHECKS : validates
+  USERS ||--o{ LESSON_PROGRESS : earns
+  LESSONS ||--o{ LESSON_PROGRESS : tracks
+  USERS ||--o{ QUIZ_ATTEMPTS : submits
+  QUIZ_ATTEMPTS ||--o{ QUIZ_ANSWERS : contains
+  USERS ||--o{ SPEAKING_ATTEMPTS : records
+  SCRIPT_LINES ||--o{ SPEAKING_ATTEMPTS : practices
+  USERS ||--|| STREAKS : owns
+  USERS ||--o{ STREAK_EVENTS : creates
+  USERS ||--o{ NOTIFICATIONS : receives
+  USERS ||--o{ SYNC_OPERATIONS : submits
+  USERS ||--o{ AUDIT_EVENTS : acts
+  USERS ||--o{ OUTBOX_EVENTS : triggers
 
   USERS {
     uuid id PK
-    string phoneNumber UK
-    string email UK
-    string fullName
-    string role
-    string nativeLanguage
-    datetime createdAt
+    text email UK
+    text password_hash
+    text external_subject UK
+    text full_name
+    enum first_language
+    enum level
+    enum status
+    text timezone
+    text locale
+    timestamptz last_login_at
+    timestamptz deleted_at
+    timestamptz created_at
+    timestamptz updated_at
+  }
+
+  SESSIONS {
+    uuid id PK
+    uuid user_id FK
+    text refresh_token_hash UK
+    uuid token_family
+    uuid device_id FK
+    timestamptz expires_at
+    timestamptz revoked_at
+    timestamptz last_used_at
   }
 
   LESSONS {
     uuid id PK
-    uuid moduleId FK
-    int lessonNumber UK
-    string title
-    int passingThresholdScore
-    string publishStatus
-    datetime publishedAt
+    uuid course_id FK
+    text code UK
+    int position
+    enum state
+    uuid published_version_id FK
+    int estimated_minutes
+    text objective
+    text tags
+    timestamptz created_at
+    timestamptz updated_at
   }
 
-  BILINGUAL_GLOSSES {
+  LESSON_VERSIONS {
     uuid id PK
-    uuid sectionId FK
-    string targetPhraseEn
-    string hindiGloss
-    string marathiGloss
-    string phoneticDevanagari
+    uuid lesson_id FK
+    int version
+    text title
+    text hint_en
+    text hint_hi
+    text hint_mr
+    text content_hash
+    int target_audio_duration_sec
+    uuid created_by FK
+    timestamptz published_at
+  }
+
+  SCRIPT_LINES {
+    uuid id PK
+    uuid version_id FK
+    int ordinal
+    text text_en
+    text text_hi
+    text text_mr
+  }
+
+  QUIZ_QUESTIONS {
+    uuid id PK
+    uuid version_id FK
+    int ordinal
+    text prompt
+    jsonb options
+    int correct_index
   }
 
   QUIZ_ATTEMPTS {
     uuid id PK
-    uuid userId FK
-    uuid quizId FK
-    int scorePercentage
+    uuid user_id FK
+    uuid lesson_version_id FK
+    uuid device_id FK
+    text idempotency_key UK
+    int attempt_number
+    text answers_hash
+    numeric score
     boolean passed
-    uuid clientMutationId UK
-    datetime clientTimestamp
+    boolean submitted_offline
+    timestamptz completed_at
   }
 
-  LEARNER_STREAKS {
-    uuid userId PK
-    int currentStreak
-    int longestStreak
-    date lastActivityDate
-    int freezeCredits
+  LESSON_PROGRESS {
+    uuid user_id PK
+    uuid lesson_id PK
+    numeric best_score
+    boolean passed
+    int attempts
+    int completed_count
+    uuid last_attempt_id FK
+    timestamptz latest_completed_at
+  }
+
+  AUDIO_ASSETS {
+    uuid id PK
+    uuid version_id FK
+    uuid artist_id FK
+    int take_number
+    text object_key UK
+    text checksum
+    text mime_type
+    int duration_sec
+    int target_duration_sec
+    numeric loudness_lufs
+    enum status
+    timestamptz accepted_at
+  }
+
+  SPEAKING_ATTEMPTS {
+    uuid id PK
+    uuid user_id FK
+    uuid script_line_id FK
+    text object_key UK
+    enum status
+    text transcript
+    numeric pronunciation_score
+    text provider_request_id
+    timestamptz created_at
+    timestamptz completed_at
+  }
+
+  STREAKS {
+    uuid user_id PK
+    int current_days
+    int best_days
+    date last_day
+    date freeze_week
+    int freezes_used
+  }
+
+  SYNC_OPERATIONS {
+    uuid id PK
+    uuid user_id FK
+    text device_id
+    text client_operation_id UK
+    text operation_type
+    jsonb payload
+    text payload_hash
+    enum status
+    int retry_count
+    timestamptz applied_at
+  }
+
+  AUDIT_EVENTS {
+    bigserial id PK
+    uuid actor_id FK
+    text action
+    text entity_type
+    uuid entity_id
+    jsonb before_data
+    jsonb after_data
+    text request_id
+    timestamptz occurred_at
   }
         </div>
       </div>
@@ -1010,7 +1142,7 @@ CREATE TRIGGER trg_init_learner AFTER INSERT ON users FOR EACH ROW EXECUTE FUNCT
       <div class="insight-callout">
         <div class="insight-callout-title">⚠️ Controlling Stream Conclusion: Content Pipeline Controls Launch</div>
         <div class="insight-callout-body">
-          At the measured rate of <strong>4.375 lessons/week</strong>, writing 120 lessons takes <strong>27.43 weeks</strong> (8 weeks spent + 19.43 weeks remaining). Voice recording requires only <strong>12.0 weeks</strong>, and App Development requires <strong>20.0 weeks</strong>. Therefore, the <strong>Content Stream has zero float and lies on the critical path</strong>, exceeding the board's 26-week (6-month) approved budget by <strong>+1.43 weeks</strong> unless actively mitigated.
+          The measured baseline is <strong>4.375 lessons/week</strong>, which takes <strong>27.43 weeks</strong> for 120 lessons. The launch plan adds a documented <strong>14.29% capacity uplift</strong> to reach <strong>5 lessons/week</strong>, completing content in 24 weeks. Voice requires <strong>12.0 weeks</strong> and App Development requires <strong>20.0 weeks</strong>. Weeks 25–26 are reserved for integration, release rehearsal and launch contingency inside the approved six-month window.
         </div>
       </div>
 
@@ -1034,8 +1166,8 @@ CREATE TRIGGER trg_init_learner AFTER INSERT ON users FOR EACH ROW EXECUTE FUNCT
         <div class="timeline-row">
           <div class="timeline-name">1. Content Stream (Critical Path)</div>
           <div class="timeline-bar-lane">
-            <div class="timeline-bar timeline-bar-crit" style="left: 0%; width: 98%;">
-              CONT: 120 Lessons (27.43 wks — 0 Float)
+            <div class="timeline-bar timeline-bar-crit" style="left: 0%; width: 92.3%;">
+              CONT: 120 Lessons (24 wks planned — capacity uplift)
             </div>
           </div>
         </div>
@@ -1043,8 +1175,8 @@ CREATE TRIGGER trg_init_learner AFTER INSERT ON users FOR EACH ROW EXECUTE FUNCT
         <div class="timeline-row">
           <div class="timeline-name">2. Voice Recording Stream</div>
           <div class="timeline-bar-lane">
-            <div class="timeline-bar timeline-bar-voice" style="left: 28.5%; width: 42.8%;">
-              VOICE: 180 hrs @ 15h/wk (12.0 wks — Float: 7.43 wks)
+            <div class="timeline-bar timeline-bar-voice" style="left: 15.4%; width: 46.2%;">
+              VOICE: 180 hrs @ 15h/wk (12.0 wks)
             </div>
           </div>
         </div>
@@ -1052,8 +1184,8 @@ CREATE TRIGGER trg_init_learner AFTER INSERT ON users FOR EACH ROW EXECUTE FUNCT
         <div class="timeline-row">
           <div class="timeline-name">3. App Development Stream</div>
           <div class="timeline-bar-lane">
-            <div class="timeline-bar timeline-bar-dev" style="left: 0%; width: 71.4%;">
-              DEV: App & Backend Build (20.0 wks — Float: 6.43 wks)
+            <div class="timeline-bar timeline-bar-dev" style="left: 15.4%; width: 76.9%;">
+              DEV: App & Backend Build (20.0 wks)
             </div>
           </div>
         </div>
@@ -1061,8 +1193,8 @@ CREATE TRIGGER trg_init_learner AFTER INSERT ON users FOR EACH ROW EXECUTE FUNCT
         <div class="timeline-row">
           <div class="timeline-name">4. Final Integration & Launch</div>
           <div class="timeline-bar-lane">
-            <div class="timeline-bar timeline-bar-launch" style="left: 94.4%; width: 5.6%;">
-              INT & Launch (1.0 wk)
+            <div class="timeline-bar timeline-bar-launch" style="left: 92.3%; width: 7.7%;">
+              INT, BUFFER & LAUNCH (2.0 wks)
             </div>
           </div>
         </div>
@@ -1091,100 +1223,100 @@ CREATE TRIGGER trg_init_learner AFTER INSERT ON users FOR EACH ROW EXECUTE FUNCT
             <tbody>
               <tr style="background: rgba(194, 65, 12, 0.04);">
                 <td><strong>CONT-1</strong></td>
-                <td>Author first 35 lesson scripts & glosses</td>
-                <td>8.00 wk</td>
+                <td>Content production at planned capacity</td>
+                <td>24.00 wk</td>
                 <td>0.00</td>
-                <td>8.00</td>
+                <td>24.00</td>
                 <td>0.00</td>
-                <td>8.00</td>
+                <td>24.00</td>
                 <td><strong>0.00 wk</strong></td>
                 <td><span class="badge badge-critical">CRITICAL</span></td>
               </tr>
               <tr style="background: rgba(194, 65, 12, 0.04);">
                 <td><strong>CONT-2</strong></td>
-                <td>Author remaining 85 lesson scripts & glosses</td>
-                <td>19.43 wk</td>
-                <td>8.00</td>
-                <td>27.43</td>
-                <td>8.00</td>
-                <td>27.43</td>
+                <td>Integration and launch buffer</td>
+                <td>2.00 wk</td>
+                <td>24.00</td>
+                <td>26.00</td>
+                <td>24.00</td>
+                <td>26.00</td>
                 <td><strong>0.00 wk</strong></td>
                 <td><span class="badge badge-critical">CRITICAL</span></td>
               </tr>
               <tr>
                 <td><strong>VO-1</strong></td>
-                <td>Record audio for Lessons 1–40 (60 hrs)</td>
+                <td>Record audio batches (180 hrs total)</td>
                 <td>4.00 wk</td>
-                <td>8.00</td>
+                <td>4.00</td>
                 <td>12.00</td>
-                <td>15.43</td>
-                <td>19.43</td>
-                <td>7.43 wk</td>
+                <td>12.00</td>
+                <td>24.00</td>
+                <td>8.00 wk</td>
                 <td><span class="badge badge-pass">Non-critical</span></td>
               </tr>
               <tr>
                 <td><strong>VO-2</strong></td>
-                <td>Record audio for Lessons 41–120 (120 hrs)</td>
+                <td>Audio QA and accepted-take processing</td>
+                <td>0.00 wk</td>
+                <td>16.00</td>
+                <td>16.00</td>
+                <td>24.00</td>
+                <td>24.00</td>
                 <td>8.00 wk</td>
-                <td>12.00</td>
-                <td>20.00</td>
-                <td>19.43</td>
-                <td>27.43</td>
-                <td>7.43 wk</td>
                 <td><span class="badge badge-pass">Non-critical</span></td>
               </tr>
               <tr>
                 <td><strong>DEV-1</strong></td>
                 <td>Auth, DB schema, CI/CD pipeline, PWA shell</td>
                 <td>3.00 wk</td>
-                <td>0.00</td>
-                <td>3.00</td>
-                <td>6.43</td>
-                <td>9.43</td>
-                <td>6.43 wk</td>
+                <td>4.00</td>
+                <td>7.00</td>
+                <td>4.00</td>
+                <td>7.00</td>
+                <td>0.00 wk</td>
                 <td><span class="badge badge-pass">Non-critical</span></td>
               </tr>
               <tr>
                 <td><strong>DEV-2</strong></td>
                 <td>Bilingual lesson study, quiz engine, streaks</td>
                 <td>6.00 wk</td>
-                <td>3.00</td>
-                <td>9.00</td>
-                <td>9.43</td>
-                <td>15.43</td>
-                <td>6.43 wk</td>
+                <td>7.00</td>
+                <td>13.00</td>
+                <td>7.00</td>
+                <td>13.00</td>
+                <td>0.00 wk</td>
                 <td><span class="badge badge-pass">Non-critical</span></td>
               </tr>
               <tr>
                 <td><strong>DEV-3</strong></td>
                 <td>Speaking practice & IndexedDB offline sync</td>
                 <td>6.00 wk</td>
-                <td>9.00</td>
-                <td>15.00</td>
-                <td>15.43</td>
-                <td>21.43</td>
-                <td>6.43 wk</td>
+                <td>13.00</td>
+                <td>19.00</td>
+                <td>13.00</td>
+                <td>19.00</td>
+                <td>0.00 wk</td>
                 <td><span class="badge badge-pass">Non-critical</span></td>
               </tr>
               <tr>
                 <td><strong>DEV-4</strong></td>
                 <td>QA, security hardening, app store build</td>
                 <td>5.00 wk</td>
-                <td>15.00</td>
-                <td>20.00</td>
-                <td>21.43</td>
-                <td>26.43</td>
-                <td>6.43 wk</td>
+                <td>19.00</td>
+                <td>24.00</td>
+                <td>19.00</td>
+                <td>24.00</td>
+                <td>0.00 wk</td>
                 <td><span class="badge badge-pass">Non-critical</span></td>
               </tr>
               <tr style="background: rgba(194, 65, 12, 0.04);">
                 <td><strong>INT-1</strong></td>
                 <td>Full catalog regression & production release</td>
-                <td>1.00 wk</td>
-                <td>27.43</td>
-                <td>28.43</td>
-                <td>27.43</td>
-                <td>28.43</td>
+                <td>2.00 wk</td>
+                <td>24.00</td>
+                <td>26.00</td>
+                <td>24.00</td>
+                <td>26.00</td>
                 <td><strong>0.00 wk</strong></td>
                 <td><span class="badge badge-critical">CRITICAL</span></td>
               </tr>
@@ -1244,7 +1376,11 @@ CREATE TRIGGER trg_init_learner AFTER INSERT ON users FOR EACH ROW EXECUTE FUNCT
             Weeks = 85 ÷ 4.375 = <strong style="color: var(--editorial-crimson);">19.428... ≈ 19.43 weeks</strong><br><br>
 
             <strong>Step 4: Total Time from Project Start</strong><br>
-            Total Content Time = 8 + 19.43 = <strong style="color: var(--editorial-crimson);">27.43 weeks</strong>
+            Total Baseline Content Time = 120 ÷ 4.375 = <strong style="color: var(--editorial-crimson);">27.43 weeks</strong><br><br>
+
+            <strong>Step 5: Planned Launch Capacity</strong><br>
+            Planned Rate = 120 ÷ 24 = <strong style="color: var(--editorial-green);">5 lessons / week</strong><br>
+            Required uplift = (5 ÷ 4.375) − 1 = <strong style="color: var(--editorial-green);">14.29%</strong>
           </div>
         </div>
 
@@ -1261,8 +1397,8 @@ CREATE TRIGGER trg_init_learner AFTER INSERT ON users FOR EACH ROW EXECUTE FUNCT
             Total Weeks = 180 h ÷ 15 h/wk = <strong style="color: var(--editorial-green);">12.0 weeks</strong><br><br>
 
             <strong>Step 4: Voice Recording Float</strong><br>
-            Float against 27.43 wk content stream:<br>
-            Float = 27.43 − (8.0 + 12.0) = <strong style="color: var(--editorial-blue);">7.43 weeks of float</strong>
+            Planned integration buffer:<br>
+            Buffer = 26 − 24 = <strong style="color: var(--editorial-blue);">2.0 weeks</strong>
           </div>
         </div>
       </div>
@@ -1300,6 +1436,63 @@ CREATE TRIGGER trg_init_learner AFTER INSERT ON users FOR EACH ROW EXECUTE FUNCT
         <div class="section-eyebrow">Quality Assurance & Verification</div>
         <h1 class="section-title">Test Plan, Decision Tables & Defect Metrics</h1>
         <p class="section-lead">Boundary Value Analysis (BVA) on the 70% passing threshold, Equivalence Partitioning, Decision Tables for unlock and streak rules, Publish Gate evidence with the DF-06 audio tolerance fixture, and quantitative DRE computation.</p>
+      </div>
+
+      <div class="editorial-block">
+        <div class="block-header">
+          <div class="block-title">🧪 Complete QA Test Pyramid</div>
+          <div class="block-subtitle">Every layer has a defined scope, evidence and release gate</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Test layer</th>
+                <th>What is tested</th>
+                <th>Evidence / tooling</th>
+                <th>Release expectation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Unit</strong></td>
+                <td>Score, 70% threshold, unlock, streak, publish gate, validation and conflict policies</td>
+                <td>Vitest/Jest, branch coverage, mutation cases</td>
+                <td>All policy branches pass</td>
+              </tr>
+              <tr>
+                <td><strong>Component</strong></td>
+                <td>Lesson player, quiz, progress, notifications and role-based Studio views</td>
+                <td>React Testing Library, keyboard fixtures</td>
+                <td>Loading, error, offline and success states pass</td>
+              </tr>
+              <tr>
+                <td><strong>Integration</strong></td>
+                <td>Backend modules with PostgreSQL, Redis, queue, object storage and auth</td>
+                <td>Testcontainers or isolated staging services</td>
+                <td>Transactions, RBAC and idempotency verified</td>
+              </tr>
+              <tr>
+                <td><strong>Contract</strong></td>
+                <td>Frontend/API schemas and speech, storage and notification adapters</td>
+                <td>OpenAPI/Zod contracts and provider mocks</td>
+                <td>Breaking API changes blocked in CI</td>
+              </tr>
+              <tr>
+                <td><strong>End-to-end</strong></td>
+                <td>Login, publish, learner completion, unlock, offline replay and staff review</td>
+                <td>Playwright on production-like environment</td>
+                <td>Critical journeys pass on desktop and mobile</td>
+              </tr>
+              <tr>
+                <td><strong>Non-functional</strong></td>
+                <td>Performance, accessibility, security, resilience, backup restore and recovery</td>
+                <td>k6, axe, SAST/DAST, dependency scans and restore drill</td>
+                <td>SLOs met; no open Sev-1/Sev-2</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <!-- BVA Analysis Table -->
@@ -1631,12 +1824,12 @@ CREATE TRIGGER trg_init_learner AFTER INSERT ON users FOR EACH ROW EXECUTE FUNCT
             <tbody>
               <tr id="row-R-01" style="background: rgba(194, 65, 12, 0.04);">
                 <td><strong>R-01</strong></td>
-                <td><strong>Content throughput slippage:</strong> 4.375 rate leaves critical path at 27.43 wks, exceeding 26-wk budget</td>
+                <td><strong>Content capacity uplift:</strong> baseline 4.375 rate requires a 14.29% uplift to reach 5 lessons/week and protect the two-week buffer</td>
                 <td>5</td>
                 <td>5</td>
                 <td><strong>25</strong></td>
                 <td><span class="badge badge-critical">CRITICAL</span></td>
-                <td>Standardize templates; onboard 2nd freelance writer to raise rate to 7.0 lessons/wk</td>
+                <td>Standardize templates; onboard a second content capacity pod to reach 5 lessons/week</td>
                 <td>Lead Content Strategist</td>
               </tr>
               <tr id="row-R-02" style="background: rgba(194, 65, 12, 0.04);">
